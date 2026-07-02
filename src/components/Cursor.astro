@@ -1,5 +1,5 @@
 ---
-// Cursor de lujo (punto + anillo) con atracción magnética hacia [data-magnetic].
+// Cursor de lujo (punto + anillo) que resalta sobre elementos interactivos.
 // Solo visible en dispositivos de puntero fino; se desactiva con reduced-motion.
 ---
 
@@ -21,7 +21,6 @@
     let my = window.innerHeight / 2;
     let rx = mx;
     let ry = my;
-    let magnetTarget: HTMLElement | null = null;
     let raf = 0;
 
     const onMove = (e: PointerEvent) => {
@@ -29,23 +28,8 @@
       my = e.clientY;
       dot.style.transform = `translate(${mx}px, ${my}px) translate(-50%, -50%)`;
 
-      const el = (e.target as HTMLElement)?.closest<HTMLElement>("[data-magnetic], a, button");
-      if (el && el.hasAttribute("data-magnetic")) {
-        magnetTarget = el;
-        const r = el.getBoundingClientRect();
-        const cx = r.left + r.width / 2;
-        const cy = r.top + r.height / 2;
-        const dx = (mx - cx) * 0.35;
-        const dy = (my - cy) * 0.35;
-        el.style.transform = `translate(${dx}px, ${dy}px)`;
-        ring.classList.add("cursor-active");
-      } else {
-        if (magnetTarget) {
-          magnetTarget.style.transform = "";
-          magnetTarget = null;
-        }
-        ring.classList.toggle("cursor-active", !!(el && el.closest("a,button")));
-      }
+      const el = (e.target as HTMLElement)?.closest<HTMLElement>("a, button");
+      ring.classList.toggle("cursor-active", !!el);
     };
 
     const loop = () => {
@@ -62,7 +46,6 @@
     (root as any)._cleanup = () => {
       window.removeEventListener("pointermove", onMove);
       cancelAnimationFrame(raf);
-      if (magnetTarget) magnetTarget.style.transform = "";
     };
   }
 
@@ -81,9 +64,5 @@
     height: 3.25rem;
     border-color: var(--color-gold-200);
     background: color-mix(in srgb, var(--color-gold-500) 10%, transparent);
-  }
-  [data-magnetic] {
-    display: inline-flex;
-    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 </style>
