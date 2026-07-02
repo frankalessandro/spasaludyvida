@@ -227,6 +227,7 @@ export const healthServices = services.filter((s) => s.categoria === "salud");
 export const businessInfo = {
   nombre: "Spa Salud y Vida",
   whatsapp: "https://wa.me/573226030044",
+  instagram: "https://www.instagram.com/saludyvida_centrodeestetica/",
   horarios: {
     lunesAViernes: ["8:00 AM - 12:00 PM", "3:00 PM - 7:00 PM"],
     sabado: "8:00 AM - 12:00 PM",
