@@ -1,23 +1,81 @@
-<!doctype html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
-	</head>
-	<body>
-		<slot />
-	</body>
-</html>
+---
+import "../styles/global.css";
+import Navbar from "../components/Navbar.astro";
+import Footer from "../components/Footer.astro";
+import Animations from "../components/Animations.astro";
+import Cursor from "../components/Cursor.astro";
+import OrganicClips from "../components/OrganicClips.astro";
+import { ClientRouter } from "astro:transitions";
 
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
-</style>
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Spa Salud y Vida — Estética avanzada premium",
+  description = "Tratamientos faciales, corporales y de salud no invasivos con tecnología de última generación. Una experiencia de lujo en bienestar y belleza.",
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline>
+      // Marca JS disponible antes de pintar para poder ocultar elementos .reveal sin FOUC.
+      document.documentElement.classList.add("js");
+    </script>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+
+    <!-- Fuentes: Fraunces (display, variable, bold editorial) + Jost (texto/UI) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,500;1,9..144,600&family=Jost:wght@200;300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
+    <ClientRouter />
+  </head>
+  <body>
+    <OrganicClips />
+    <div class="relative min-h-screen">
+      <!-- Aura de fondo global -->
+      <div aria-hidden="true" class="pointer-events-none fixed inset-0 -z-10">
+        <div
+          class="absolute -top-40 left-1/2 h-[46rem] w-[46rem] -translate-x-1/2 rounded-full blur-[140px]"
+          style="background: radial-gradient(circle, color-mix(in srgb, var(--color-plum-600) 55%, transparent), transparent 70%);"
+        >
+        </div>
+        <div
+          class="absolute bottom-0 right-[-10rem] h-[34rem] w-[34rem] rounded-full blur-[150px] opacity-60"
+          style="background: radial-gradient(circle, color-mix(in srgb, var(--color-gold-600) 30%, transparent), transparent 70%);"
+        >
+        </div>
+        <div
+          class="absolute inset-0 opacity-[0.05]"
+          style="background-image: linear-gradient(color-mix(in srgb, var(--color-silver-100) 100%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--color-silver-100) 100%, transparent) 1px, transparent 1px); background-size: 64px 64px; mask-image: radial-gradient(ellipse at center, black, transparent 78%);"
+        >
+        </div>
+      </div>
+
+      <Navbar />
+      <main>
+        <slot />
+      </main>
+      <Footer />
+    </div>
+    <Cursor />
+    <Animations />
+  </body>
+</html>

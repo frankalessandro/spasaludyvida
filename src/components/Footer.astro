@@ -1,0 +1,86 @@
+---
+import { businessInfo, services } from "../data/services";
+import Logo from "./Logo.astro";
+const year = new Date().getFullYear();
+const { horarios } = businessInfo;
+---
+
+<footer class="relative mt-32 border-t border-[color-mix(in_srgb,var(--color-gold-400)_14%,transparent)]">
+  <div class="mx-auto max-w-7xl px-5 py-20 md:px-10">
+    <div class="grid gap-14 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr]">
+      <!-- Marca -->
+      <div>
+        <div class="flex items-center gap-3">
+          <span
+            class="grid h-11 w-11 place-items-center rounded-full border border-[color-mix(in_srgb,var(--color-gold-400)_45%,transparent)]"
+          >
+            <Logo class="glow-gold h-6 w-6 text-gold-300" />
+          </span>
+          <span class="font-display text-2xl tracking-wide text-cream">
+            Salud <span class="text-gold">&amp;</span> Vida
+          </span>
+        </div>
+        <p class="mt-6 max-w-sm text-sm leading-relaxed text-silver-400">
+          Un santuario de estética avanzada y bienestar. Tecnología de última generación al servicio de
+          tu belleza, con el cuidado y la exclusividad que mereces.
+        </p>
+        <a href={businessInfo.whatsapp} target="_blank" rel="noopener" class="btn-outline mt-8">
+          Agendar cita
+        </a>
+      </div>
+
+      <!-- Tratamientos -->
+      <div>
+        <h4 class="eyebrow mb-6">Tratamientos</h4>
+        <ul class="space-y-3">
+          {
+            services.map((s) => (
+              <li>
+                <a
+                  href={`/servicios/${s.slug}`}
+                  class="text-sm text-silver-300 transition-colors hover:text-gold-300"
+                >
+                  {s.nombre}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      <!-- Horarios / contacto -->
+      <div>
+        <h4 class="eyebrow mb-6">Horarios</h4>
+        <ul class="space-y-3 text-sm text-silver-300">
+          <li class="flex flex-col">
+            <span class="text-cream">Lunes a Viernes</span>
+            {horarios.lunesAViernes.map((h) => <span class="text-silver-400">{h}</span>)}
+          </li>
+          <li class="flex flex-col">
+            <span class="text-cream">Sábado</span>
+            <span class="text-silver-400">{horarios.sabado}</span>
+          </li>
+          <li class="flex flex-col">
+            <span class="text-cream">Domingo</span>
+            <span class="text-silver-400">{horarios.domingo}</span>
+          </li>
+        </ul>
+        <a
+          href={businessInfo.whatsapp}
+          target="_blank"
+          rel="noopener"
+          class="mt-6 inline-block text-sm text-gold-300 transition-colors hover:text-gold-200"
+        >
+          WhatsApp · +57 322 603 0044
+        </a>
+      </div>
+    </div>
+
+    <div
+      class="mt-16 flex flex-col items-center justify-between gap-4 border-t border-[color-mix(in_srgb,var(--color-silver-100)_8%,transparent)] pt-8 text-xs text-silver-500 md:flex-row"
+    >
+      <p>© {year} {businessInfo.nombre}. Todos los derechos reservados.</p>
+      <p class="tracking-[0.2em] uppercase">Estética · Bienestar · Exclusividad</p>
+    </div>
+  </div>
+</footer>

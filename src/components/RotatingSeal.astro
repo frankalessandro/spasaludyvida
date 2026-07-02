@@ -1,0 +1,41 @@
+---
+// Sello circular giratorio — texto de marca sobre un círculo, con el logo fijo al centro.
+import Logo from "./Logo.astro";
+
+interface Props {
+  text?: string;
+  class?: string;
+}
+const { text = "SPA · SALUD Y VIDA · ESTÉTICA AVANZADA · ", class: className = "" } = Astro.props;
+const id = "seal-path-" + Math.random().toString(36).slice(2, 8);
+---
+
+<div class:list={["relative grid place-items-center", className]} aria-hidden="true">
+  <svg viewBox="0 0 200 200" class="seal-spin h-full w-full">
+    <defs>
+      <path id={id} d="M 100,100 m -78,0 a 78,78 0 1,1 156,0 a 78,78 0 1,1 -156,0" />
+    </defs>
+    <circle cx="100" cy="100" r="78" fill="none" stroke="currentColor" stroke-width="0.5" opacity="0.35" />
+    <text fill="currentColor" font-size="10.3" letter-spacing="2.3">
+      <textPath href={`#${id}`} startOffset="0%">{text}</textPath>
+    </text>
+  </svg>
+  <Logo class="glow-gold absolute h-20 w-20 text-gold-300" />
+</div>
+
+<style>
+  .seal-spin {
+    animation: seal-rotate 26s linear infinite;
+    color: var(--color-gold-400);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .seal-spin {
+      animation: none;
+    }
+  }
+  @keyframes seal-rotate {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>

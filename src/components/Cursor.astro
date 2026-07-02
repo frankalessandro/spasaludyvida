@@ -1,0 +1,89 @@
+---
+// Cursor de lujo (punto + anillo) con atracción magnética hacia [data-magnetic].
+// Solo visible en dispositivos de puntero fino; se desactiva con reduced-motion.
+---
+
+<div id="cursor-root" class="pointer-events-none fixed inset-0 z-[999] hidden">
+  <div id="cursor-ring" class="fixed left-0 top-0 h-9 w-9 -translate-x-1/2 -translate-y-1/2 rounded-full border border-gold-400/70 transition-[width,height,border-color] duration-300"></div>
+  <div id="cursor-dot" class="fixed left-0 top-0 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gold-300"></div>
+</div>
+
+<script>
+  function initCursor() {
+    const root = document.getElementById("cursor-root");
+    const ring = document.getElementById("cursor-ring");
+    const dot = document.getElementById("cursor-dot");
+    if (!root || !ring || !dot) return;
+    if (!window.matchMedia("(pointer: fine)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let mx = window.innerWidth / 2;
+    let my = window.innerHeight / 2;
+    let rx = mx;
+    let ry = my;
+    let magnetTarget: HTMLElement | null = null;
+    let raf = 0;
+
+    const onMove = (e: PointerEvent) => {
+      mx = e.clientX;
+      my = e.clientY;
+      dot.style.transform = `translate(${mx}px, ${my}px) translate(-50%, -50%)`;
+
+      const el = (e.target as HTMLElement)?.closest<HTMLElement>("[data-magnetic], a, button");
+      if (el && el.hasAttribute("data-magnetic")) {
+        magnetTarget = el;
+        const r = el.getBoundingClientRect();
+        const cx = r.left + r.width / 2;
+        const cy = r.top + r.height / 2;
+        const dx = (mx - cx) * 0.35;
+        const dy = (my - cy) * 0.35;
+        el.style.transform = `translate(${dx}px, ${dy}px)`;
+        ring.classList.add("cursor-active");
+      } else {
+        if (magnetTarget) {
+          magnetTarget.style.transform = "";
+          magnetTarget = null;
+        }
+        ring.classList.toggle("cursor-active", !!(el && el.closest("a,button")));
+      }
+    };
+
+    const loop = () => {
+      rx += (mx - rx) * 0.18;
+      ry += (my - ry) * 0.18;
+      ring.style.transform = `translate(${rx}px, ${ry}px) translate(-50%, -50%)`;
+      raf = requestAnimationFrame(loop);
+    };
+
+    window.addEventListener("pointermove", onMove);
+    raf = requestAnimationFrame(loop);
+    root.classList.remove("hidden");
+
+    (root as any)._cleanup = () => {
+      window.removeEventListener("pointermove", onMove);
+      cancelAnimationFrame(raf);
+      if (magnetTarget) magnetTarget.style.transform = "";
+    };
+  }
+
+  function cleanupCursor() {
+    const root = document.getElementById("cursor-root") as any;
+    root?._cleanup?.();
+  }
+
+  document.addEventListener("astro:page-load", initCursor);
+  document.addEventListener("astro:before-swap", cleanupCursor);
+</script>
+
+<style>
+  #cursor-ring.cursor-active {
+    width: 3.25rem;
+    height: 3.25rem;
+    border-color: var(--color-gold-200);
+    background: color-mix(in srgb, var(--color-gold-500) 10%, transparent);
+  }
+  [data-magnetic] {
+    display: inline-flex;
+    transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+</style>

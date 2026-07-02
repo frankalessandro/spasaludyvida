@@ -1,0 +1,66 @@
+---
+import { serviceAccent, type Service } from "../data/services";
+
+interface Props {
+  service: Service;
+  class?: string;
+  /** Muestra el monograma grande. */
+  monogram?: boolean;
+}
+
+const { service, class: className = "", monogram = true } = Astro.props;
+const [from, to] = serviceAccent[service.slug] ?? ["#5c3aa6", "#cfa64d"];
+const initial = service.nombre.trim().charAt(0).toUpperCase();
+---
+
+<div
+  class:list={["relative overflow-hidden", className]}
+  style={`--art-from:${from}; --art-to:${to};`}
+>
+  <!-- Base -->
+  <div
+    class="absolute inset-0"
+    style="background: radial-gradient(120% 120% at 15% 10%, color-mix(in srgb, var(--art-from) 85%, black), var(--color-plum-950) 62%);"
+  >
+  </div>
+  <!-- Halo dorado -->
+  <div
+    class="absolute inset-0 opacity-80"
+    style="background: radial-gradient(90% 90% at 85% 90%, color-mix(in srgb, var(--art-to) 45%, transparent), transparent 60%);"
+  >
+  </div>
+  <!-- Textura de líneas finas -->
+  <div
+    class="absolute inset-0 opacity-[0.14] mix-blend-screen"
+    style="background-image: repeating-linear-gradient(115deg, color-mix(in srgb, var(--color-silver-100) 100%, transparent) 0 1px, transparent 1px 22px);"
+  >
+  </div>
+  <!-- Aro concéntrico -->
+  <div
+    aria-hidden="true"
+    class="absolute -right-16 -top-16 h-64 w-64 rounded-full border opacity-30"
+    style="border-color: color-mix(in srgb, var(--art-to) 70%, transparent);"
+  >
+  </div>
+
+  {
+    monogram && (
+      <span
+        aria-hidden="true"
+        class="pointer-events-none absolute bottom-[-0.22em] right-2 font-display leading-none opacity-[0.16] select-none"
+        style="font-size: clamp(9rem, 22vw, 18rem); color: var(--color-cream); font-style: italic;"
+      >
+        {initial}
+      </span>
+    )
+  }
+
+  <!-- Viñeta -->
+  <div
+    class="absolute inset-0"
+    style="box-shadow: inset 0 -80px 120px -40px var(--color-void), inset 0 40px 80px -60px color-mix(in srgb, var(--color-silver-100) 40%, transparent);"
+  >
+  </div>
+
+  <slot />
+</div>

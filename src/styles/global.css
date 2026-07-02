@@ -1,0 +1,320 @@
+@import "tailwindcss";
+
+/* ============================================================
+   SPA SALUD Y VIDA — Sistema de diseño (luxury dark)
+   Morado profundo · plata · dorado — oscuro pero brillante
+   Fuentes: Fraunces (display, bold editorial) + Jost (texto/UI)
+   ============================================================ */
+
+@theme {
+  /* Tipografía */
+  --font-display: "Fraunces", ui-serif, Georgia, serif;
+  --font-sans: "Jost", ui-sans-serif, system-ui, sans-serif;
+
+  /* Fondos — negro-morado profundo */
+  --color-void: #060310;
+  --color-ink: #0b0518;
+  --color-plum-950: #100827;
+  --color-plum-900: #180c33;
+  --color-plum-800: #221041;
+  --color-plum-700: #311a5c;
+  --color-plum-600: #452a80;
+  --color-plum-500: #5c3aa6;
+  --color-plum-400: #7d5bc4;
+
+  /* Dorado */
+  --color-gold-200: #f6e9c4;
+  --color-gold-300: #ecd49a;
+  --color-gold-400: #dcbb6e;
+  --color-gold-500: #cfa64d;
+  --color-gold-600: #b0862f;
+  --color-gold-700: #8a6520;
+
+  /* Plata */
+  --color-silver-100: #f1f2f8;
+  --color-silver-200: #dfe1ec;
+  --color-silver-300: #c7cad9;
+  --color-silver-400: #a2a7bd;
+  --color-silver-500: #7f849c;
+  --color-silver-600: #5d6178;
+  --color-silver-700: #444a60;
+
+  /* Crema (texto sobre oscuro) */
+  --color-cream: #f4eedf;
+
+  /* Animaciones */
+  --animate-shimmer: shimmer 6s linear infinite;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-glow: glow 4s ease-in-out infinite;
+  --animate-marquee: marquee 38s linear infinite;
+}
+
+/* --- Keyframes --- */
+@keyframes shimmer {
+  to {
+    background-position: 200% center;
+  }
+}
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-14px);
+  }
+}
+@keyframes glow {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.85;
+  }
+}
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-void);
+    color: var(--color-silver-200);
+    font-family: var(--font-sans);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    color: var(--color-cream);
+    font-weight: 600;
+    line-height: 0.98;
+    letter-spacing: -0.01em;
+  }
+
+  ::selection {
+    background: var(--color-gold-500);
+    color: var(--color-void);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-void);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(var(--color-plum-600), var(--color-plum-800));
+    border-radius: 9999px;
+    border: 2px solid var(--color-void);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(var(--color-gold-600), var(--color-plum-700));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+
+  /* Cursor de lujo: solo en dispositivos con puntero fino (desktop) */
+  @media (pointer: fine) {
+    html.js body {
+      cursor: none;
+    }
+    html.js a,
+    html.js button {
+      cursor: none;
+    }
+  }
+}
+
+/* ============================================================
+   Utilidades / componentes de marca
+   ============================================================ */
+@layer components {
+  /* Texto con degradado dorado brillante */
+  .text-gold {
+    background: linear-gradient(
+      100deg,
+      var(--color-gold-600) 0%,
+      var(--color-gold-200) 30%,
+      var(--color-gold-400) 55%,
+      var(--color-gold-200) 78%,
+      var(--color-gold-600) 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: var(--animate-shimmer);
+  }
+
+  .text-silver {
+    background: linear-gradient(180deg, var(--color-silver-100), var(--color-silver-400));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Línea/borde fino luminoso */
+  .hairline {
+    border: 1px solid color-mix(in srgb, var(--color-gold-400) 22%, transparent);
+  }
+
+  /* Superficie tipo vidrio */
+  .glass {
+    background: color-mix(in srgb, var(--color-plum-900) 55%, transparent);
+    backdrop-filter: blur(14px);
+    border: 1px solid color-mix(in srgb, var(--color-silver-100) 8%, transparent);
+  }
+
+  /* Eyebrow: pequeño rótulo tracking amplio */
+  .eyebrow {
+    font-size: 0.78rem;
+    letter-spacing: 0.36em;
+    text-transform: uppercase;
+    color: var(--color-gold-300);
+    font-weight: 600;
+  }
+
+  /* Botón dorado principal */
+  .btn-gold {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.95rem 2.1rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-void);
+    background: linear-gradient(120deg, var(--color-gold-300), var(--color-gold-500) 55%, var(--color-gold-600));
+    border-radius: 9999px;
+    overflow: hidden;
+    transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease;
+    box-shadow: 0 10px 30px -12px color-mix(in srgb, var(--color-gold-500) 60%, transparent);
+  }
+  .btn-gold:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 44px -14px color-mix(in srgb, var(--color-gold-400) 75%, transparent);
+  }
+
+  /* Botón outline plata/dorado */
+  .btn-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.95rem 2.1rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-silver-100);
+    border: 1px solid color-mix(in srgb, var(--color-gold-400) 40%, transparent);
+    border-radius: 9999px;
+    transition: border-color 0.4s ease, color 0.4s ease, background 0.4s ease;
+  }
+  .btn-outline:hover {
+    color: var(--color-gold-200);
+    border-color: var(--color-gold-400);
+    background: color-mix(in srgb, var(--color-gold-500) 8%, transparent);
+  }
+
+  /* Resplandor dorado para la marca (logo en SVG) */
+  .glow-gold {
+    filter: drop-shadow(0 0 6px color-mix(in srgb, var(--color-gold-400) 65%, transparent))
+      drop-shadow(0 0 16px color-mix(in srgb, var(--color-gold-500) 35%, transparent));
+  }
+
+  /* Titular en contorno (efecto revista de moda) */
+  .text-outline {
+    color: transparent;
+    -webkit-text-stroke: 1.5px color-mix(in srgb, var(--color-gold-400) 75%, transparent);
+    paint-order: stroke fill;
+  }
+
+  /* Máscara orgánica para imágenes/arte (evita el rectángulo predecible).
+     border-radius sirve de fallback si el navegador no soporta clip-path: url(). */
+  .mask-organic {
+    border-radius: 2.5rem;
+    clip-path: url(#blob-1);
+  }
+  .mask-organic-alt {
+    border-radius: 2.5rem;
+    clip-path: url(#blob-2);
+  }
+
+  /* Carril horizontal arrastrable sin scrollbar visible */
+  .drag-rail {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    cursor: grab;
+  }
+  .drag-rail::-webkit-scrollbar {
+    display: none;
+  }
+  .drag-rail:active {
+    cursor: grabbing;
+  }
+
+  /* Línea de titular partida en máscaras (reveal cinético al cargar) */
+  .kinetic-line {
+    display: block;
+    overflow: hidden;
+    padding-bottom: 0.06em;
+  }
+  html.js .kinetic-line > span {
+    display: inline-block;
+    transform: translateY(115%) rotate(4deg);
+    will-change: transform;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html.js .kinetic-line > span {
+      transform: none;
+    }
+  }
+}
+
+@layer utilities {
+  /* Reveal para animaciones GSAP. Solo se oculta si hay JS (clase .js en <html>),
+     así el sitio estático sigue siendo visible sin JavaScript. */
+  html.js .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    will-change: transform, opacity;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html.js .reveal {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
