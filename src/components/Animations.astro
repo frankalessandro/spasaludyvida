@@ -31,15 +31,37 @@
         rail.setPointerCapture(e.pointerId);
         startX = e.clientX;
         startScroll = rail.scrollLeft;
+        // El snap pelea con el arrastre programático; se desactiva mientras dura.
+        rail.style.scrollSnapType = "none";
       });
       rail.addEventListener("pointermove", (e) => {
         if (!dragging) return;
         rail.scrollLeft = startScroll - (e.clientX - startX);
       });
-      const stop = () => (dragging = false);
+      const stop = () => {
+        dragging = false;
+        rail.style.scrollSnapType = "";
+      };
       rail.addEventListener("pointerup", stop);
       rail.addEventListener("pointercancel", stop);
       rail.addEventListener("pointerleave", stop);
+
+      // Barra de progreso opcional: hermano inmediato [data-rail-progress] con [data-rail-fill].
+      const progress = rail.nextElementSibling;
+      const fill =
+        progress instanceof HTMLElement && progress.hasAttribute("data-rail-progress")
+          ? progress.querySelector<HTMLElement>("[data-rail-fill]")
+          : null;
+      if (fill) {
+        const update = () => {
+          const max = rail.scrollWidth - rail.clientWidth;
+          const p = max > 0 ? rail.scrollLeft / max : 1;
+          fill.style.transform = `scaleX(${Math.max(0.04, Math.min(1, p))})`;
+        };
+        rail.addEventListener("scroll", update, { passive: true });
+        window.addEventListener("resize", update, { passive: true });
+        update();
+      }
     });
   }
 

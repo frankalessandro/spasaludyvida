@@ -300,12 +300,66 @@
     scrollbar-width: none;
     -ms-overflow-style: none;
     cursor: grab;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: 1.25rem;
   }
   .drag-rail::-webkit-scrollbar {
     display: none;
   }
   .drag-rail:active {
     cursor: grabbing;
+  }
+
+  /* Progreso de un carril arrastrable (se actualiza por JS en Animations.astro) */
+  .rail-track {
+    display: block;
+    height: 2px;
+    overflow: hidden;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--color-silver-100) 12%, transparent);
+  }
+  .rail-fill {
+    display: block;
+    height: 100%;
+    width: 100%;
+    transform: scaleX(0.04);
+    transform-origin: left center;
+    background: linear-gradient(90deg, var(--color-gold-500), var(--color-gold-300));
+    will-change: transform;
+  }
+
+  /* Pista de deslizamiento para carriles táctiles */
+  .swipe-hint {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--color-silver-500);
+    white-space: nowrap;
+  }
+  .swipe-hint::after {
+    content: "→";
+    color: var(--color-gold-400);
+    animation: swipe-nudge 1.6s ease-in-out infinite;
+  }
+  @keyframes swipe-nudge {
+    0%,
+    100% {
+      transform: translateX(0);
+      opacity: 0.55;
+    }
+    50% {
+      transform: translateX(6px);
+      opacity: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .swipe-hint::after {
+      animation: none;
+    }
   }
 
   /* Línea de titular partida en máscaras (reveal cinético al cargar) */

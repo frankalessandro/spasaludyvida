@@ -13,10 +13,10 @@ import { businessInfo } from "../data/services";
     <div class="mx-auto grid w-full max-w-7xl items-center gap-12 px-5 md:px-10 lg:grid-cols-[1.15fr_0.85fr]">
       <div>
         <p class="eyebrow reveal mb-6 flex items-center gap-4">
-          <span class="h-px w-10 bg-gold-500/60"></span>
+          <span class="h-px w-10 shrink-0 bg-gold-500/60"></span>
           Estética avanzada · Bienestar de lujo
         </p>
-        <h1 class="text-balance font-display text-6xl font-semibold leading-[0.92] md:text-7xl lg:text-[6.5rem]">
+        <h1 class="text-balance font-display text-[2.6rem] font-semibold leading-[0.92] sm:text-6xl md:text-7xl lg:text-[6.5rem]">
           <span class="kinetic-line"><span>El arte de</span></span>
           <span class="kinetic-line"><span class="text-gold italic">realzar</span><span> tu</span></span>
           <span class="kinetic-line"><span>belleza natural</span></span>
@@ -33,7 +33,7 @@ import { businessInfo } from "../data/services";
         </div>
 
         <!-- Métricas -->
-        <div class="mt-16 flex flex-wrap gap-x-4 gap-y-6">
+        <div class="mt-12 flex flex-wrap gap-x-3 gap-y-6 sm:mt-16 sm:gap-x-6">
           <StatRing value="9" label="Tratamientos premium" />
           <StatRing value="100%" label="No invasivo" />
           <StatRing value="+8" label="Años de experiencia" />
@@ -73,8 +73,8 @@ import { businessInfo } from "../data/services";
       </div>
     </div>
 
-    <!-- Scroll hint -->
-    <div class="absolute inset-x-0 bottom-8 flex justify-center">
+    <!-- Scroll hint (solo desktop: en móvil el hero es más alto que el viewport y se superpone) -->
+    <div class="absolute inset-x-0 bottom-8 hidden justify-center lg:flex">
       <span class="flex flex-col items-center gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.26em] text-silver-400">
         Descubre
         <span class="h-10 w-px animate-pulse bg-gradient-to-b from-gold-400 to-transparent"></span>
@@ -86,9 +86,9 @@ import { businessInfo } from "../data/services";
   <PillarsRail />
 
   <!-- ============================ NOSOTROS ============================ -->
-  <section id="nosotros" class="relative scroll-mt-24 py-32">
+  <section id="nosotros" class="relative scroll-mt-24 py-20 md:py-32">
     <div class="mx-auto grid max-w-7xl items-center gap-16 px-5 md:px-10 lg:grid-cols-2">
-      <div class="reveal relative aspect-[4/5]" data-parallax="8">
+      <div class="reveal relative order-2 aspect-[4/5] lg:order-1" data-parallax="8">
         <!-- Capa recortada (solo el arte) -->
         <div
           class="mask-organic-alt absolute inset-0 overflow-hidden"
@@ -96,14 +96,14 @@ import { businessInfo } from "../data/services";
         >
         </div>
         <!-- Texto: por encima del recorte, nunca se corta -->
-        <div class="absolute inset-0 z-10 flex flex-col justify-end p-10">
+        <div class="absolute inset-0 z-10 flex flex-col justify-end p-6 sm:p-10">
           <span class="font-display text-8xl italic leading-none text-gold/40">"</span>
-          <p class="-mt-8 font-display text-3xl leading-tight text-cream">
+          <p class="-mt-8 font-display text-2xl leading-tight text-cream sm:text-3xl">
             Cada tratamiento es un ritual pensado para ti.
           </p>
           <p class="mt-4 text-sm text-silver-400">— Nuestro compromiso con la excelencia</p>
         </div>
-        <div class="glass absolute -right-6 bottom-10 z-10 rounded-2xl px-6 py-5 text-center" data-float>
+        <div class="glass absolute right-4 bottom-10 z-10 rounded-2xl px-6 py-5 text-center lg:-right-6" data-float>
           <p class="font-display text-4xl text-gold">+8</p>
           <p class="text-xs uppercase tracking-[0.18em] text-silver-500">años cuidándote</p>
         </div>
@@ -111,8 +111,8 @@ import { businessInfo } from "../data/services";
 
       <div class="order-1 lg:order-2">
         <p class="eyebrow reveal mb-5">Quiénes somos</p>
-        <h2 class="reveal font-display text-5xl leading-[0.95] md:text-6xl">
-          <span class="float-left mr-3 font-display text-8xl leading-[0.75] text-gold">U</span>n
+        <h2 class="reveal font-display text-4xl leading-[0.95] sm:text-5xl md:text-6xl">
+          <span class="float-left mr-3 font-display text-6xl leading-[0.75] text-gold sm:text-7xl md:text-8xl">U</span>n
           santuario de <span class="text-gold">belleza</span> y bienestar
         </h2>
         <p class="reveal mt-7 text-base leading-relaxed text-silver-300">
@@ -148,11 +148,11 @@ import { businessInfo } from "../data/services";
   </section>
 
   <!-- ============================ TRATAMIENTOS ============================ -->
-  <section id="tratamientos" class="relative scroll-mt-24 py-24">
+  <section id="tratamientos" class="relative scroll-mt-24 py-16 md:py-24">
     <div class="mx-auto max-w-7xl px-5 md:px-10">
       <div class="reveal mx-auto max-w-2xl text-center">
         <p class="eyebrow mb-5">Nuestros tratamientos</p>
-        <h2 class="font-display text-5xl leading-tight md:text-6xl">
+        <h2 class="font-display text-4xl leading-tight sm:text-5xl md:text-6xl">
           Rituales de <span class="text-gold italic">alta estética</span>
         </h2>
         <p class="mt-6 text-silver-300">
@@ -168,13 +168,13 @@ import { businessInfo } from "../data/services";
   </section>
 
   <!-- ============================ EXPERIENCIA ============================ -->
-  <section id="experiencia" class="relative scroll-mt-24 py-28">
+  <section id="experiencia" class="relative scroll-mt-24 py-20 md:py-28">
     <div class="mx-auto max-w-7xl px-5 md:px-10">
       <div class="grid gap-16 lg:grid-cols-2">
         <!-- Proceso de reserva -->
         <div class="reveal">
           <p class="eyebrow mb-5">Tu experiencia</p>
-          <h2 class="font-display text-5xl leading-tight">Reservar es muy simple</h2>
+          <h2 class="font-display text-4xl leading-tight md:text-5xl">Reservar es muy simple</h2>
           <p class="mt-5 text-silver-300">
             Te acompañamos en cada paso para que solo tengas que preocuparte por disfrutar.
           </p>
@@ -200,7 +200,7 @@ import { businessInfo } from "../data/services";
         <!-- Servicios holísticos -->
         <div class="reveal">
           <p class="eyebrow mb-5">Más allá de la estética</p>
-          <h2 class="font-display text-5xl leading-tight">Bienestar holístico</h2>
+          <h2 class="font-display text-4xl leading-tight md:text-5xl">Bienestar holístico</h2>
           <p class="mt-5 text-silver-300">
             Complementa tu ritual con experiencias que equilibran cuerpo, mente y energía.
           </p>
@@ -224,13 +224,13 @@ import { businessInfo } from "../data/services";
   </section>
 
   <!-- ============================ CTA FINAL ============================ -->
-  <section class="relative overflow-hidden py-32">
+  <section class="relative overflow-hidden py-24 md:py-32">
     <div class="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 select-none text-center" aria-hidden="true">
       <span class="font-display text-outline text-[16vw] font-semibold leading-none opacity-40">EXCLUSIVO</span>
     </div>
     <div class="relative mx-auto max-w-3xl px-5 text-center md:px-10">
       <p class="reveal eyebrow mb-6">Tu momento es ahora</p>
-      <h2 class="reveal mx-auto max-w-2xl font-display text-5xl leading-tight md:text-6xl">
+      <h2 class="reveal mx-auto max-w-2xl font-display text-4xl leading-tight sm:text-5xl md:text-6xl">
         Regálate una experiencia <span class="text-gold italic">verdaderamente premium</span>
       </h2>
       <p class="reveal mx-auto mt-6 max-w-lg text-silver-300">

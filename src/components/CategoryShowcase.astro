@@ -92,19 +92,25 @@ const groups = order.map((key) => ({
   {
     groups.map((g, i) => (
       <div>
-        <div class="reveal mb-6 flex items-baseline gap-4">
-          <span class="font-display text-sm text-gold-500/70">{roman[i]}</span>
-          <div>
-            <span class="block font-display text-3xl text-cream">{g.meta.label}</span>
-            <span class="mt-1 block text-sm text-silver-400">{g.meta.blurb}</span>
+        <div class="reveal mb-6 flex items-end justify-between gap-4">
+          <div class="flex items-baseline gap-4">
+            <span class="font-display text-sm text-gold-500/70">{roman[i]}</span>
+            <div>
+              <span class="block font-display text-3xl text-cream">{g.meta.label}</span>
+              <span class="mt-1 block text-sm text-silver-400">{g.meta.blurb}</span>
+            </div>
           </div>
+          <span class="swipe-hint pb-1">Desliza</span>
         </div>
-        <div class="reveal drag-rail flex gap-5 overflow-x-auto pb-4">
+        <div class="reveal drag-rail flex snap-x gap-5 overflow-x-auto pb-4">
           {g.items.map((s) => (
-            <div class="w-[78vw] shrink-0">
+            <div class="w-[78vw] shrink-0 snap-start sm:w-80">
               <ServiceCard service={s} />
             </div>
           ))}
+        </div>
+        <div data-rail-progress class="rail-track mt-2">
+          <span data-rail-fill class="rail-fill" />
         </div>
       </div>
     ))
