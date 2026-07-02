@@ -1,12 +1,14 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import ServiceCard from "../../components/ServiceCard.astro";
+import ServiceArt from "../../components/ServiceArt.astro";
 import {
   services,
   categoryMeta,
   formatCOP,
   businessInfo,
   type Service,
+  type NivelInvasion,
 } from "../../data/services";
 
 export function getStaticPaths() {
@@ -31,6 +33,13 @@ const ficha: { label: string; value: string }[] = [
   { label: "Valoración previa", value: service.requiereConsulta ? "Requerida" : "No necesaria" },
 ].filter((f) => f.value);
 
+// Confort durante la aplicación, según el nivel de invasión del propio servicio.
+const comfortText: Record<NivelInvasion, string> = {
+  Bajo: "Un proceso cómodo, sin dolor y con sensación de calor suave.",
+  Medio: "Puede generar una leve molestia tolerable durante la aplicación.",
+  Alto: "Un proceso más intenso, siempre bajo control profesional.",
+};
+
 // Narrativa del proceso — construida con los datos propios del servicio (sin inventar hechos)
 const proceso = [
   {
@@ -42,19 +51,27 @@ const proceso = [
   },
   {
     n: "02",
-    title: "Aplicación del tratamiento",
-    text: service.duracion
-      ? `Sesión de ${service.duracion}, realizada por especialistas con equipos certificados.`
-      : "Sesión realizada por especialistas con equipos certificados.",
+    title: "Preparación",
+    text: `Recomendado para edades entre ${service.edad_minima} y ${service.edad_maxima} años. Te explicamos cada paso antes de comenzar para que llegues con total confianza.`,
   },
   {
     n: "03",
+    title: "Aplicación del tratamiento",
+    text: `${service.duracion ? `Sesión de ${service.duracion}, realizada` : "Sesión realizada"} por especialistas con equipos certificados. ${comfortText[service.nivel_invasion]}`,
+  },
+  {
+    n: "04",
     title: "Cuidados posteriores",
     text: service.cuidados ?? "No requiere cuidados especiales adicionales tras la sesión.",
   },
   {
-    n: "04",
-    title: "Resultados",
+    n: "05",
+    title: "Evolución",
+    text: "Los resultados se hacen progresivamente más visibles en las semanas siguientes, a medida que tu piel o cuerpo responden al tratamiento.",
+  },
+  {
+    n: "06",
+    title: "Resultado",
     text: service.beneficios?.length
       ? `Notarás beneficios como ${service.beneficios.slice(0, 2).join(" y ").toLowerCase()}.`
       : service.descripcion_short,
@@ -67,6 +84,8 @@ const relatedSorted = [
   ...related.filter((s) => s.categoria === service.categoria),
   ...related.filter((s) => s.categoria !== service.categoria),
 ].slice(0, 6);
+
+const galeriaCaptions = ["Equipo especializado", "Cabina de tratamiento", "Aplicación", "Resultado"];
 ---
 
 <Layout title={`${service.nombre} — Spa Salud y Vida`} description={service.descripcion_short}>
@@ -95,28 +114,12 @@ const relatedSorted = [
           {service.descripcion_short}
         </p>
 
-        <div class="reveal mt-9 flex items-end gap-8">
-          <div>
-            <span class="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-silver-400">Desde</span>
-            <p class="font-display text-4xl text-gold">
-              <span data-count-to={service.precio_por_sesion} data-count-prefix="$">$0</span>
-            </p>
-            <span class="text-xs text-silver-500">por sesión</span>
-          </div>
-          {
-            service.precio_tratamiento_completo && (
-              <div class="border-l border-[color-mix(in_srgb,var(--color-gold-400)_20%,transparent)] pl-8">
-                <span class="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-silver-400">
-                  Tratamiento completo
-                </span>
-                <p class="font-display text-2xl text-silver-100">
-                  {typeof service.precio_tratamiento_completo === "number"
-                    ? formatCOP(service.precio_tratamiento_completo)
-                    : service.precio_tratamiento_completo}
-                </p>
-              </div>
-            )
-          }
+        <div class="reveal mt-9">
+          <span class="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-silver-400">Desde</span>
+          <p class="font-display text-5xl text-gold">
+            <span data-count-to={service.precio_por_sesion} data-count-prefix="$">$0</span>
+          </p>
+          <span class="text-xs text-silver-500">por sesión — planes completos más abajo</span>
         </div>
 
         <div class="reveal mt-10 flex flex-wrap gap-4">
@@ -147,60 +150,59 @@ const relatedSorted = [
         </div>
       </div>
 
-      <!-- Columna arte: sticky con máscara orgánica -->
+      <!-- Columna arte: sticky, con marco definido para no diluir la estética -->
       <div
         class="reveal relative lg:sticky lg:top-28 lg:h-[calc(100vh-9rem)] min-h-[26rem]"
         data-parallax="-6"
       >
-        <!-- Capa recortada (solo el arte y el monograma decorativo) -->
-        <div
-          class="mask-organic absolute inset-0 overflow-hidden"
-          style={`background: radial-gradient(120% 120% at 15% 10%, color-mix(in srgb, ${service.categoria === "facial" ? "var(--color-plum-500)" : service.categoria === "corporal" ? "var(--color-gold-700)" : "var(--color-plum-600)"} 60%, black), var(--color-plum-950) 65%);`}
-        >
-          <div
-            class="absolute inset-0 opacity-[0.14] mix-blend-screen"
-            style="background-image: repeating-linear-gradient(115deg, var(--color-silver-100) 0 1px, transparent 1px 22px);"
-          >
-          </div>
-          <span
-            class="pointer-events-none absolute bottom-[-0.2em] right-4 select-none font-display italic leading-none text-cream opacity-[0.14]"
-            style="font-size: clamp(9rem, 20vw, 17rem);"
-          >
-            {service.nombre.trim().charAt(0)}
-          </span>
-        </div>
-        <!-- Texto: por encima del recorte, nunca se corta -->
-        <div class="absolute inset-x-10 bottom-14 z-10">
-          <p class="eyebrow">{cat.eyebrow}</p>
-          <p class="mt-2 font-display text-3xl text-cream">{service.nombre}</p>
+        <ServiceArt service={service} class="mask-organic hairline h-full w-full" />
+        <div class="glass absolute inset-x-6 bottom-6 rounded-2xl px-6 py-5 sm:inset-x-10 sm:bottom-10">
+          <p class="eyebrow mb-1">{cat.eyebrow}</p>
+          <p class="font-display text-2xl text-cream sm:text-3xl">{service.nombre}</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ============================ PALABRA GIGANTE ============================ -->
-  <section aria-hidden="true" class="relative overflow-hidden border-y border-[color-mix(in_srgb,var(--color-gold-400)_12%,transparent)] py-8">
-    <div class="flex w-max animate-[marquee_30s_linear_infinite] gap-8 whitespace-nowrap">
-      {
-        Array.from({ length: 2 }).flatMap(() =>
-          Array.from({ length: 6 }).map(() => (
-            <span class="font-display text-4xl italic text-gold/50">{service.nombre}</span>
-          ))
-        )
-      }
-    </div>
-  </section>
-
-  <!-- ============================ SOBRE EL TRATAMIENTO + PROCESO ============================ -->
+  <!-- ============================ SOBRE EL TRATAMIENTO ============================ -->
   <section class="relative py-24">
-    <div class="mx-auto max-w-4xl px-5 md:px-10">
-      <p class="eyebrow reveal mb-5">En qué consiste</p>
-      <p class="reveal text-2xl leading-relaxed text-silver-200 md:text-3xl">
-        <span class="float-left mr-2 font-display text-7xl leading-[0.75] text-gold">
-          {(service.descripcion_long ?? service.descripcion_short).charAt(0)}
-        </span>
-        {(service.descripcion_long ?? service.descripcion_short).slice(1)}
-      </p>
+    <div class="mx-auto max-w-5xl px-5 md:px-10">
+      <div class="grid gap-10 lg:grid-cols-[0.55fr_1fr] lg:items-start">
+        <div class="reveal">
+          <p class="eyebrow mb-5">En qué consiste</p>
+          <h2 class="font-display text-4xl leading-[0.98] md:text-5xl">Sobre {service.nombre}</h2>
+        </div>
+        <p class="reveal border-l border-[color-mix(in_srgb,var(--color-gold-400)_25%,transparent)] pl-8 text-lg leading-relaxed text-silver-300 md:text-xl">
+          {service.descripcion_long ?? service.descripcion_short}
+        </p>
+      </div>
+    </div>
+
+    <!-- Galería (espacio reservado para fotografía real de equipo y resultados) -->
+    <div class="mx-auto mt-16 max-w-7xl px-5 md:px-10">
+      <p class="eyebrow reveal mb-8">Por dentro</p>
+      <div class="grid grid-cols-2 gap-4 sm:grid-cols-4 sm:auto-rows-[9.5rem]">
+        <div class="reveal group relative col-span-2 row-span-2 aspect-square overflow-hidden rounded-[1.75rem] hairline sm:aspect-auto" data-parallax="-4">
+          <ServiceArt service={service} monogram={false} class="h-full w-full" />
+          <span class="absolute bottom-5 left-5 text-xs uppercase tracking-[0.2em] text-silver-100/85">
+            {galeriaCaptions[0]}
+          </span>
+        </div>
+        {
+          galeriaCaptions.slice(1).map((caption, i) => (
+            <div
+              class="reveal group relative aspect-square overflow-hidden rounded-2xl hairline sm:aspect-auto"
+              data-parallax={i % 2 === 0 ? "-8" : "-3"}
+            >
+              <ServiceArt service={service} monogram={false} class="h-full w-full" />
+              <span class="absolute bottom-4 left-4 text-[0.65rem] uppercase tracking-[0.18em] text-silver-100/75">
+                {caption}
+              </span>
+            </div>
+          ))
+        }
+      </div>
+      <p class="reveal mt-4 text-xs text-silver-600">Fotografía real de equipo y resultados, próximamente.</p>
     </div>
 
     <!-- Timeline vertical animado -->
@@ -227,20 +229,24 @@ const relatedSorted = [
     </div>
   </section>
 
-  <!-- ============================ BENEFICIOS (carrusel arrastrable) ============================ -->
+  <!-- ============================ BENEFICIOS (lista tipográfica) ============================ -->
   {
     service.beneficios && service.beneficios.length > 0 && (
-      <section class="relative py-16">
-        <div class="mx-auto max-w-7xl px-5 md:px-10">
-          <p class="eyebrow reveal mb-8">Beneficios</p>
-        </div>
-        <div class="drag-rail flex gap-6 overflow-x-auto px-5 pb-4 md:px-10">
-          {service.beneficios.map((b, i) => (
-            <div class="reveal flex w-72 shrink-0 flex-col justify-between rounded-[1.75rem] hairline bg-plum-950/40 p-7">
-              <span class="font-display text-5xl text-gold/60">{String(i + 1).padStart(2, "0")}</span>
-              <p class="mt-8 text-lg text-cream">{b}</p>
-            </div>
-          ))}
+      <section class="relative py-20">
+        <div class="mx-auto max-w-4xl px-5 md:px-10">
+          <p class="eyebrow reveal mb-10">Beneficios</p>
+          <ul>
+            {service.beneficios.map((b, i) => (
+              <li class="reveal relative flex items-baseline gap-6 py-6 sm:gap-10">
+                <span class="font-display text-sm text-gold-500/70">{String(i + 1).padStart(2, "0")}</span>
+                <p class="font-display text-2xl text-cream sm:text-3xl">{b}</p>
+                <span
+                  class="absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 bg-gradient-to-r from-gold-400 via-gold-400/40 to-transparent"
+                  data-line-draw
+                />
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
     )
@@ -249,19 +255,21 @@ const relatedSorted = [
   <!-- ============================ CUIDADOS / CONTRAINDICACIONES + FICHA ============================ -->
   <section class="relative py-16">
     <div class="mx-auto grid max-w-7xl gap-14 px-5 md:px-10 lg:grid-cols-[1.4fr_1fr]">
-      <div class="grid gap-5 sm:grid-cols-2">
+      <div class="grid gap-10 sm:grid-cols-2 sm:divide-x sm:divide-[color-mix(in_srgb,var(--color-gold-400)_14%,transparent)]">
         {
           service.cuidados && (
-            <div class="reveal rounded-2xl hairline bg-plum-950/30 p-7">
-              <p class="eyebrow mb-3">Cuidados</p>
+            <div class="reveal sm:pr-8">
+              <p class="eyebrow mb-4">Cuidados</p>
+              <span class="mb-5 block h-px w-10 origin-left scale-x-0 bg-gold-400" data-line-draw />
               <p class="text-sm leading-relaxed text-silver-300">{service.cuidados}</p>
             </div>
           )
         }
         {
           service.contraindicaciones && (
-            <div class="reveal rounded-2xl hairline bg-plum-950/30 p-7">
-              <p class="eyebrow mb-3">Contraindicaciones</p>
+            <div class="reveal sm:pl-8">
+              <p class="eyebrow mb-4">Contraindicaciones</p>
+              <span class="mb-5 block h-px w-10 origin-left scale-x-0 bg-gold-400" data-line-draw />
               <p class="text-sm leading-relaxed text-silver-300">{service.contraindicaciones}</p>
             </div>
           )
@@ -275,7 +283,7 @@ const relatedSorted = [
             ficha.map((f) => (
               <div class="flex items-center justify-between gap-4 border-b border-[color-mix(in_srgb,var(--color-silver-100)_8%,transparent)] pb-5 last:border-0 last:pb-0">
                 <dt class="text-sm text-silver-500">{f.label}</dt>
-                <dd class="text-right text-sm text-cream">{f.value}</dd>
+                <dd class="text-right font-display text-base font-semibold text-cream">{f.value}</dd>
               </div>
             ))
           }
@@ -285,6 +293,83 @@ const relatedSorted = [
         </a>
         <p class="mt-4 text-center text-xs text-silver-500">Respuesta inmediata por WhatsApp</p>
       </aside>
+    </div>
+  </section>
+
+  <!-- ============================ INVERSIÓN (planes) ============================ -->
+  <section class="relative py-20">
+    <div class="mx-auto max-w-5xl px-5 md:px-10">
+      <div class="reveal mb-12 text-center">
+        <p class="eyebrow mb-4">Inversión</p>
+        <h2 class="font-display text-4xl md:text-5xl">Elige tu plan</h2>
+      </div>
+
+      <div
+        class:list={[
+          "grid gap-6",
+          service.precio_tratamiento_completo ? "sm:grid-cols-2" : "sm:mx-auto sm:max-w-md",
+        ]}
+      >
+        <div class="reveal relative flex flex-col rounded-[2rem] hairline glass p-9">
+          <p class="eyebrow mb-8 text-silver-300">Sesión individual</p>
+          <p class="text-silver font-display text-5xl leading-none">{formatCOP(service.precio_por_sesion)}</p>
+          <p class="mt-3 text-[0.68rem] uppercase tracking-[0.2em] text-silver-500">Pago único · por sesión</p>
+          <ul class="mt-8 space-y-4 border-t border-[color-mix(in_srgb,var(--color-silver-100)_10%,transparent)] pt-8 text-sm text-silver-300">
+            <li class="flex items-start gap-3">
+              <span class="mt-[0.4em] h-1.5 w-1.5 shrink-0 rounded-full bg-silver-400"></span>
+              1 sesión completa de {service.nombre}
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="mt-[0.4em] h-1.5 w-1.5 shrink-0 rounded-full bg-silver-400"></span>
+              Valoración personalizada
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="mt-[0.4em] h-1.5 w-1.5 shrink-0 rounded-full bg-silver-400"></span>
+              Seguimiento post-tratamiento
+            </li>
+          </ul>
+          <a href={businessInfo.whatsapp} target="_blank" rel="noopener" class="btn-outline mt-9 w-full justify-center">
+            Reservar sesión
+          </a>
+        </div>
+
+        {
+          service.precio_tratamiento_completo && (
+            <div
+              class="reveal relative flex flex-col overflow-hidden rounded-[2rem] p-9 lg:-translate-y-2"
+              style="border:1px solid color-mix(in srgb, var(--color-gold-400) 45%, transparent); background: linear-gradient(165deg, color-mix(in srgb, var(--color-gold-600) 18%, var(--color-plum-950)), var(--color-plum-950) 72%); box-shadow: 0 32px 70px -32px color-mix(in srgb, var(--color-gold-500) 55%, transparent);"
+            >
+              <span class="absolute right-7 top-7 rounded-full border border-[color-mix(in_srgb,var(--color-gold-400)_45%,transparent)] bg-void/50 px-3 py-1 text-[0.62rem] uppercase tracking-[0.2em] text-gold-200 backdrop-blur">
+                Recomendado
+              </span>
+              <p class="eyebrow mb-8 text-gold-300">Tratamiento completo</p>
+              <p class="text-gold font-display text-5xl leading-none">
+                {typeof service.precio_tratamiento_completo === "number"
+                  ? formatCOP(service.precio_tratamiento_completo)
+                  : service.precio_tratamiento_completo}
+              </p>
+              <p class="mt-3 text-[0.68rem] uppercase tracking-[0.2em] text-silver-400">Protocolo completo</p>
+              <ul class="mt-8 space-y-4 border-t border-[color-mix(in_srgb,var(--color-gold-400)_20%,transparent)] pt-8 text-sm text-silver-200">
+                <li class="flex items-start gap-3">
+                  <span class="mt-[0.4em] h-1.5 w-1.5 shrink-0 rounded-full bg-gold-400"></span>
+                  Protocolo completo de {service.nombre}
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="mt-[0.4em] h-1.5 w-1.5 shrink-0 rounded-full bg-gold-400"></span>
+                  Seguimiento continuo de resultados
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="mt-[0.4em] h-1.5 w-1.5 shrink-0 rounded-full bg-gold-400"></span>
+                  Plan de cuidado personalizado
+                </li>
+              </ul>
+              <a href={businessInfo.whatsapp} target="_blank" rel="noopener" class="btn-gold mt-9 w-full justify-center">
+                Reservar plan completo
+              </a>
+            </div>
+          )
+        }
+      </div>
     </div>
   </section>
 

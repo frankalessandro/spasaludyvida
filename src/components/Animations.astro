@@ -160,6 +160,17 @@
         });
       });
 
+      // --- Línea horizontal que se dibuja al entrar en viewport (beneficios, cuidados) ---
+      gsap.utils.toArray<HTMLElement>("[data-line-draw]").forEach((line) => {
+        ScrollTrigger.create({
+          trigger: line,
+          start: "top 92%",
+          once: true,
+          onEnter: () =>
+            gsap.to(line, { scaleX: 1, duration: 0.9, ease: "power3.out" }),
+        });
+      });
+
       // --- Count-up numérico (precios / stats) ---
       gsap.utils.toArray<HTMLElement>("[data-count-to]").forEach((el) => {
         const to = Number(el.dataset.countTo) || 0;
