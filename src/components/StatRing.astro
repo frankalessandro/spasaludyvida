@@ -1,0 +1,29 @@
+---
+// Cifra enmarcada por un anillo SVG que se dibuja al entrar en viewport.
+interface Props {
+  value: string;
+  label: string;
+}
+const { value, label } = Astro.props;
+---
+
+<div class="reveal flex flex-col items-center gap-4 text-center">
+  <div class="relative grid h-24 w-24 place-items-center sm:h-28 sm:w-28">
+    <svg viewBox="0 0 100 100" class="absolute inset-0 h-full w-full -rotate-90">
+      <circle cx="50" cy="50" r="44" fill="none" stroke="currentColor" stroke-width="1" class="text-silver-700/40" />
+      <circle
+        cx="50"
+        cy="50"
+        r="44"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        class="text-gold-400"
+        data-ring-fg
+      />
+    </svg>
+    <span class="font-display text-2xl text-gold">{value}</span>
+  </div>
+  <p class="text-xs uppercase tracking-[0.22em] text-silver-500">{label}</p>
+</div>

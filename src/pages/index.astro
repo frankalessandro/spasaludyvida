@@ -1,11 +1,249 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import Layout from "../layouts/Layout.astro";
+import RotatingSeal from "../components/RotatingSeal.astro";
+import PillarsRail from "../components/PillarsRail.astro";
+import CategoryShowcase from "../components/CategoryShowcase.astro";
+import StatRing from "../components/StatRing.astro";
+import { businessInfo } from "../data/services";
 ---
 
 <Layout>
-	<Welcome />
+  <!-- ============================ HERO ============================ -->
+  <section class="relative flex min-h-screen items-center overflow-hidden pt-28">
+    <div class="mx-auto grid w-full max-w-7xl items-center gap-12 px-5 md:px-10 lg:grid-cols-[1.15fr_0.85fr]">
+      <div>
+        <p class="eyebrow reveal mb-6 flex items-center gap-4">
+          <span class="h-px w-10 shrink-0 bg-gold-500/60"></span>
+          Estética avanzada · Bienestar de lujo
+        </p>
+        <h1 class="text-balance font-display text-[2.6rem] font-semibold leading-[0.92] sm:text-6xl md:text-7xl lg:text-[6.5rem]">
+          <span class="kinetic-line"><span>El arte de</span></span>
+          <span class="kinetic-line"><span class="text-gold italic">realzar</span><span> tu</span></span>
+          <span class="kinetic-line"><span>belleza natural</span></span>
+        </h1>
+        <p class="reveal mt-8 max-w-md text-lg font-light leading-relaxed text-silver-300">
+          Tecnología de última generación, manos expertas y una experiencia diseñada al detalle.
+          Resultados visibles y duraderos, sin cirugía.
+        </p>
+        <div class="reveal mt-10 flex flex-wrap items-center gap-4">
+          <a href={businessInfo.whatsapp} target="_blank" rel="noopener" class="btn-gold">
+            Reservar experiencia
+          </a>
+          <a href="#tratamientos" class="btn-outline">Ver tratamientos</a>
+        </div>
+
+        <!-- Métricas -->
+        <div class="mt-12 flex flex-wrap gap-x-3 gap-y-6 sm:mt-16 sm:gap-x-6">
+          <StatRing value="9" label="Tratamientos premium" />
+          <StatRing value="100%" label="No invasivo" />
+          <StatRing value="+8" label="Años de experiencia" />
+        </div>
+      </div>
+
+      <!-- Composición visual: sello giratorio + panel -->
+      <div class="reveal relative hidden lg:block">
+        <!-- Contenedor sin recorte: aquí vive el texto, siempre completo -->
+        <div class="relative mx-auto aspect-[3/4] w-full max-w-sm" data-parallax="-10">
+          <!-- Capa recortada (solo el arte, nunca el texto) -->
+          <div
+            class="mask-organic absolute inset-0 overflow-hidden"
+            style="background: radial-gradient(120% 120% at 20% 0%, var(--color-plum-700), var(--color-plum-950) 65%);"
+          >
+            <div
+              class="absolute inset-0 opacity-70"
+              style="background: radial-gradient(80% 60% at 80% 100%, color-mix(in srgb, var(--color-gold-500) 40%, transparent), transparent 60%);"
+            >
+            </div>
+            <div
+              class="absolute inset-0 opacity-[0.12]"
+              style="background-image: repeating-linear-gradient(115deg, var(--color-silver-100) 0 1px, transparent 1px 26px);"
+            >
+            </div>
+          </div>
+          <!-- Texto: por encima del recorte, nunca se corta -->
+          <div class="absolute inset-x-10 bottom-14 z-10">
+            <p class="eyebrow">Ritual insignia</p>
+            <p class="mt-2 font-display text-3xl text-cream">HIFU 7D<br />Lifting sin cirugía</p>
+          </div>
+        </div>
+        <!-- Sello giratorio flotante -->
+        <div class="glass absolute -left-14 top-10 z-10 h-36 w-36 rounded-full p-2" data-float>
+          <RotatingSeal class="text-gold-400" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Scroll hint (solo desktop: en móvil el hero es más alto que el viewport y se superpone) -->
+    <div class="absolute inset-x-0 bottom-8 hidden justify-center lg:flex">
+      <span class="flex flex-col items-center gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.26em] text-silver-400">
+        Descubre
+        <span class="h-10 w-px animate-pulse bg-gradient-to-b from-gold-400 to-transparent"></span>
+      </span>
+    </div>
+  </section>
+
+  <!-- ============================ RAÍL DE PILARES (pineado) ============================ -->
+  <PillarsRail />
+
+  <!-- ============================ NOSOTROS ============================ -->
+  <section id="nosotros" class="relative scroll-mt-24 py-20 md:py-32">
+    <div class="mx-auto grid max-w-7xl items-center gap-16 px-5 md:px-10 lg:grid-cols-2">
+      <div class="reveal relative order-2 aspect-[4/5] lg:order-1" data-parallax="8">
+        <!-- Capa recortada (solo el arte) -->
+        <div
+          class="mask-organic-alt absolute inset-0 overflow-hidden"
+          style="background: radial-gradient(120% 100% at 100% 0%, var(--color-plum-600), var(--color-plum-950) 70%);"
+        >
+        </div>
+        <!-- Texto: por encima del recorte, nunca se corta -->
+        <div class="absolute inset-0 z-10 flex flex-col justify-end p-6 sm:p-10">
+          <span class="font-display text-8xl italic leading-none text-gold/40">"</span>
+          <p class="-mt-8 font-display text-2xl leading-tight text-cream sm:text-3xl">
+            Cada tratamiento es un ritual pensado para ti.
+          </p>
+          <p class="mt-4 text-sm text-silver-400">— Nuestro compromiso con la excelencia</p>
+        </div>
+        <div class="glass absolute right-4 bottom-10 z-10 rounded-2xl px-6 py-5 text-center lg:-right-6" data-float>
+          <p class="font-display text-4xl text-gold">+8</p>
+          <p class="text-xs uppercase tracking-[0.18em] text-silver-500">años cuidándote</p>
+        </div>
+      </div>
+
+      <div class="order-1 lg:order-2">
+        <p class="eyebrow reveal mb-5">Quiénes somos</p>
+        <h2 class="reveal font-display text-4xl leading-[0.95] sm:text-5xl md:text-6xl">
+          <span class="float-left mr-3 font-display text-6xl leading-[0.75] text-gold sm:text-7xl md:text-8xl">U</span>n
+          santuario de <span class="text-gold">belleza</span> y bienestar
+        </h2>
+        <p class="reveal mt-7 text-base leading-relaxed text-silver-300">
+          En Spa Salud y Vida fusionamos la estética avanzada con un enfoque holístico del bienestar.
+          Combinamos aparatología médica de última generación con el arte del cuidado personalizado,
+          en un espacio diseñado para que te desconectes del mundo y te reconectes contigo.
+        </p>
+        <p class="reveal mt-4 text-base leading-relaxed text-silver-400">
+          Nuestro equipo de especialistas diseña cada protocolo a la medida de tu piel, tu cuerpo y
+          tus objetivos, garantizando resultados naturales, seguros y duraderos.
+        </p>
+
+        <ul class="mt-9 grid gap-4 sm:grid-cols-2">
+          {
+            [
+              { t: "Tecnología certificada", d: "Equipos con registro INVIMA" },
+              { t: "Protocolos a medida", d: "Diseñados para cada persona" },
+              { t: "Especialistas expertas", d: "Manos formadas y confiables" },
+              { t: "Ambiente exclusivo", d: "Privacidad y confort premium" },
+            ].map((f) => (
+              <li class="reveal flex gap-3 rounded-2xl hairline bg-plum-950/30 p-4">
+                <span class="mt-1 h-2 w-2 shrink-0 rounded-full bg-gold-500" />
+                <div>
+                  <p class="text-sm text-cream">{f.t}</p>
+                  <p class="text-xs text-silver-500">{f.d}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ TRATAMIENTOS ============================ -->
+  <section id="tratamientos" class="relative scroll-mt-24 py-16 md:py-24">
+    <div class="mx-auto max-w-7xl px-5 md:px-10">
+      <div class="reveal mx-auto max-w-2xl text-center">
+        <p class="eyebrow mb-5">Nuestros tratamientos</p>
+        <h2 class="font-display text-4xl leading-tight sm:text-5xl md:text-6xl">
+          Rituales de <span class="text-gold italic">alta estética</span>
+        </h2>
+        <p class="mt-6 text-silver-300">
+          Una carta curada de tratamientos faciales, corporales y de salud. Cada uno, una promesa de
+          resultados visibles.
+        </p>
+      </div>
+
+      <div class="mt-16">
+        <CategoryShowcase />
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ EXPERIENCIA ============================ -->
+  <section id="experiencia" class="relative scroll-mt-24 py-20 md:py-28">
+    <div class="mx-auto max-w-7xl px-5 md:px-10">
+      <div class="grid gap-16 lg:grid-cols-2">
+        <!-- Proceso de reserva -->
+        <div class="reveal">
+          <p class="eyebrow mb-5">Tu experiencia</p>
+          <h2 class="font-display text-4xl leading-tight md:text-5xl">Reservar es muy simple</h2>
+          <p class="mt-5 text-silver-300">
+            Te acompañamos en cada paso para que solo tengas que preocuparte por disfrutar.
+          </p>
+
+          <ol class="mt-10 space-y-6">
+            {
+              businessInfo.procesoReserva.map((p) => (
+                <li class="flex items-center gap-6">
+                  <span class="grid h-14 w-14 shrink-0 place-items-center rounded-full hairline font-display text-2xl text-gold">
+                    {String(p.step).padStart(2, "0")}
+                  </span>
+                  <span class="text-lg text-cream">{p.title}</span>
+                </li>
+              ))
+            }
+          </ol>
+
+          <a href={businessInfo.whatsapp} target="_blank" rel="noopener" class="btn-gold mt-10">
+            Escríbenos por WhatsApp
+          </a>
+        </div>
+
+        <!-- Servicios holísticos -->
+        <div class="reveal">
+          <p class="eyebrow mb-5">Más allá de la estética</p>
+          <h2 class="font-display text-4xl leading-tight md:text-5xl">Bienestar holístico</h2>
+          <p class="mt-5 text-silver-300">
+            Complementa tu ritual con experiencias que equilibran cuerpo, mente y energía.
+          </p>
+
+          <div class="mt-10 space-y-4">
+            {
+              businessInfo.serviciosHolisticosDestacados.map((h, i) => (
+                <div class="group flex items-center gap-5 rounded-2xl hairline bg-plum-950/30 p-6 transition-colors hover:bg-plum-900/50">
+                  <span class="font-display text-4xl text-gold/70">0{i + 1}</span>
+                  <div>
+                    <p class="font-display text-2xl text-cream">{h.title}</p>
+                    <p class="mt-1 text-sm text-silver-400">{h.description}</p>
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ CTA FINAL ============================ -->
+  <section class="relative overflow-hidden py-24 md:py-32">
+    <div class="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 select-none text-center" aria-hidden="true">
+      <span class="font-display text-outline text-[16vw] font-semibold leading-none opacity-40">EXCLUSIVO</span>
+    </div>
+    <div class="relative mx-auto max-w-3xl px-5 text-center md:px-10">
+      <p class="reveal eyebrow mb-6">Tu momento es ahora</p>
+      <h2 class="reveal mx-auto max-w-2xl font-display text-4xl leading-tight sm:text-5xl md:text-6xl">
+        Regálate una experiencia <span class="text-gold italic">verdaderamente premium</span>
+      </h2>
+      <p class="reveal mx-auto mt-6 max-w-lg text-silver-300">
+        Agenda tu valoración personalizada y descubre el tratamiento perfecto para ti.
+      </p>
+      <a
+        href={businessInfo.whatsapp}
+        target="_blank"
+        rel="noopener"
+        class="btn-gold reveal mt-10"
+      >
+        Reservar ahora
+      </a>
+    </div>
+  </section>
 </Layout>

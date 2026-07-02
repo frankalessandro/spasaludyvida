@@ -1,0 +1,153 @@
+---
+import { businessInfo } from "../data/services";
+import Logo from "./Logo.astro";
+
+const links = [
+  { label: "Inicio", href: "/" },
+  { label: "Tratamientos", href: "/#tratamientos" },
+  { label: "Nosotros", href: "/#nosotros" },
+  { label: "Experiencia", href: "/#experiencia" },
+];
+---
+
+<header
+  id="site-header"
+  class="fixed inset-x-0 top-0 z-50 transition-all duration-500"
+  data-scrolled="false"
+>
+  <nav class="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 md:px-10">
+    <!-- Wordmark -->
+    <a href="/" class="group flex items-center gap-3" aria-label="Spa Salud y Vida — inicio">
+      <span
+        class="grid h-11 w-11 place-items-center rounded-full border border-[color-mix(in_srgb,var(--color-gold-400)_45%,transparent)] transition-transform duration-500 group-hover:rotate-[18deg]"
+      >
+        <Logo class="glow-gold h-9 w-9 text-gold-300" />
+      </span>
+      <span class="flex flex-col leading-none">
+        <span class="font-display text-xl tracking-wide text-cream">Salud <span class="text-gold">&amp;</span> Vida</span>
+        <span class="text-[0.65rem] font-medium uppercase tracking-[0.38em] text-silver-400">Spa · Estética</span>
+      </span>
+    </a>
+
+    <!-- Links desktop -->
+    <ul class="hidden items-center gap-9 lg:flex">
+      {
+        links.map((l) => (
+          <li>
+            <a
+              href={l.href}
+              class="group relative text-[0.82rem] uppercase tracking-[0.2em] text-silver-300 transition-colors hover:text-cream"
+            >
+              {l.label}
+              <span class="absolute -bottom-1.5 left-0 h-px w-0 bg-gradient-to-r from-gold-400 to-transparent transition-all duration-500 group-hover:w-full" />
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <div class="flex items-center gap-3">
+      <a href={businessInfo.whatsapp} target="_blank" rel="noopener" class="btn-gold hidden sm:inline-flex">
+        Reservar
+      </a>
+
+      <!-- Toggle móvil -->
+      <button
+        id="nav-toggle"
+        class="grid h-11 w-11 place-items-center rounded-full hairline text-silver-200 lg:hidden"
+        aria-label="Abrir menú"
+        aria-expanded="false"
+      >
+        <span class="relative block h-3.5 w-5">
+          <span class="absolute left-0 top-0 h-px w-full bg-current transition-all" data-bar="1"></span>
+          <span class="absolute left-0 top-1.5 h-px w-full bg-current transition-all" data-bar="2"></span>
+          <span class="absolute left-0 top-3 h-px w-full bg-current transition-all" data-bar="3"></span>
+        </span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Menú móvil -->
+  <div
+    id="mobile-menu"
+    class="glass pointer-events-none max-h-0 overflow-y-auto opacity-0 transition-all duration-500 lg:hidden"
+  >
+    <ul class="flex flex-col gap-1 px-8 py-6">
+      {
+        links.map((l) => (
+          <li>
+            <a
+              href={l.href}
+              class="block py-3 font-display text-2xl text-cream/90 transition-colors hover:text-gold-300"
+              data-mobile-link
+            >
+              {l.label}
+            </a>
+          </li>
+        ))
+      }
+      <li class="pt-3">
+        <a href={businessInfo.whatsapp} target="_blank" rel="noopener" class="btn-gold w-full justify-center">
+          Reservar por WhatsApp
+        </a>
+      </li>
+    </ul>
+  </div>
+</header>
+
+<script>
+  function initNav() {
+    const header = document.getElementById("site-header");
+    const toggle = document.getElementById("nav-toggle");
+    const menu = document.getElementById("mobile-menu");
+    if (!header || !toggle || !menu) return;
+
+    // Glass al hacer scroll
+    const onScroll = () => {
+      const scrolled = window.scrollY > 24;
+      header.dataset.scrolled = String(scrolled);
+      header.classList.toggle("nav-solid", scrolled);
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    // Menú móvil
+    let open = false;
+    const setMenu = (state: boolean) => {
+      open = state;
+      toggle.setAttribute("aria-expanded", String(open));
+      menu.classList.toggle("pointer-events-none", !open);
+      menu.classList.toggle("opacity-0", !open);
+      menu.classList.toggle("max-h-0", !open);
+      menu.classList.toggle("max-h-[80vh]", open);
+      toggle.classList.toggle("is-open", open);
+    };
+    toggle.addEventListener("click", () => setMenu(!open));
+    menu.querySelectorAll("[data-mobile-link]").forEach((a) =>
+      a.addEventListener("click", () => setMenu(false))
+    );
+  }
+
+  document.addEventListener("astro:page-load", initNav);
+</script>
+
+<style>
+  #site-header.nav-solid {
+    background: color-mix(in srgb, var(--color-void) 80%, transparent);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid color-mix(in srgb, var(--color-gold-400) 14%, transparent);
+  }
+  #site-header.nav-solid nav {
+    padding-top: 0.85rem;
+    padding-bottom: 0.85rem;
+  }
+  #nav-toggle.is-open [data-bar="1"] {
+    transform: translateY(6px) rotate(45deg);
+  }
+  #nav-toggle.is-open [data-bar="2"] {
+    opacity: 0;
+  }
+  #nav-toggle.is-open [data-bar="3"] {
+    transform: translateY(-6px) rotate(-45deg);
+  }
+</style>

@@ -1,0 +1,101 @@
+---
+import { businessInfo } from "../data/services";
+import Logo from "./Logo.astro";
+const year = new Date().getFullYear();
+const { horarios } = businessInfo;
+---
+
+<footer class="relative mt-32 border-t border-[color-mix(in_srgb,var(--color-gold-400)_14%,transparent)]">
+  <div class="mx-auto max-w-7xl px-5 py-20 md:px-10">
+    <div class="grid gap-14 md:grid-cols-2">
+      <!-- Marca -->
+      <div>
+        <div class="flex items-center gap-3">
+          <span
+            class="grid h-11 w-11 place-items-center rounded-full border border-[color-mix(in_srgb,var(--color-gold-400)_45%,transparent)]"
+          >
+            <Logo class="glow-gold h-6 w-6 text-gold-300" />
+          </span>
+          <span class="font-display text-2xl tracking-wide text-cream">
+            Salud <span class="text-gold">&amp;</span> Vida
+          </span>
+        </div>
+        <p class="mt-6 max-w-sm text-sm leading-relaxed text-silver-400">
+          Un santuario de estética avanzada y bienestar. Tecnología de última generación al servicio de
+          tu belleza, con el cuidado y la exclusividad que mereces.
+        </p>
+
+        <div class="mt-8 flex items-center gap-4">
+          <a href={businessInfo.whatsapp} target="_blank" rel="noopener" class="btn-outline">
+            Agendar cita
+          </a>
+
+          <a
+            href={businessInfo.whatsapp}
+            target="_blank"
+            rel="noopener"
+            aria-label="WhatsApp"
+            class="grid h-11 w-11 place-items-center rounded-full border border-[color-mix(in_srgb,var(--color-gold-400)_30%,transparent)] text-silver-300 transition-colors hover:border-gold-300 hover:text-gold-300"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5" aria-hidden="true">
+              <path
+                d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.372-.025-.521-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.876 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"
+              ></path>
+              <path
+                d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.874.52 3.629 1.42 5.126L2 22l5.09-1.526a9.85 9.85 0 0 0 4.95 1.328h.004c5.46 0 9.91-4.45 9.91-9.91C21.954 6.45 17.5 2 12.04 2zm0 18.13h-.003a8.19 8.19 0 0 1-4.174-1.14l-.3-.178-3.017.905.905-2.941-.196-.303a8.187 8.187 0 0 1-1.256-4.363c0-4.53 3.688-8.217 8.221-8.217 2.196 0 4.259.856 5.812 2.41a8.156 8.156 0 0 1 2.407 5.813c0 4.532-3.688 8.014-8.399 8.014z"
+              ></path>
+            </svg>
+          </a>
+
+          <a
+            href={businessInfo.instagram}
+            target="_blank"
+            rel="noopener"
+            aria-label="Instagram"
+            class="grid h-11 w-11 place-items-center rounded-full border border-[color-mix(in_srgb,var(--color-gold-400)_30%,transparent)] text-silver-300 transition-colors hover:border-gold-300 hover:text-gold-300"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" class="h-5 w-5" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="5"></rect>
+              <circle cx="12" cy="12" r="4"></circle>
+              <circle cx="17.2" cy="6.8" r="1" fill="currentColor" stroke="none"></circle>
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Horarios / contacto -->
+      <div>
+        <h4 class="eyebrow mb-6">Horarios</h4>
+        <ul class="space-y-3 text-sm text-silver-300">
+          <li class="flex flex-col">
+            <span class="text-cream">Lunes a Viernes</span>
+            {horarios.lunesAViernes.map((h) => <span class="text-silver-400">{h}</span>)}
+          </li>
+          <li class="flex flex-col">
+            <span class="text-cream">Sábado</span>
+            <span class="text-silver-400">{horarios.sabado}</span>
+          </li>
+          <li class="flex flex-col">
+            <span class="text-cream">Domingo</span>
+            <span class="text-silver-400">{horarios.domingo}</span>
+          </li>
+        </ul>
+        <a
+          href={businessInfo.whatsapp}
+          target="_blank"
+          rel="noopener"
+          class="mt-6 inline-block text-sm text-gold-300 transition-colors hover:text-gold-200"
+        >
+          WhatsApp · +57 322 603 0044
+        </a>
+      </div>
+    </div>
+
+    <div
+      class="mt-16 flex flex-col items-center justify-between gap-4 border-t border-[color-mix(in_srgb,var(--color-silver-100)_8%,transparent)] pt-8 text-xs text-silver-500 md:flex-row"
+    >
+      <p>© {year} {businessInfo.nombre}. Todos los derechos reservados.</p>
+      <p class="tracking-[0.2em] uppercase">Estética · Bienestar · Exclusividad</p>
+    </div>
+  </div>
+</footer>

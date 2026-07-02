@@ -1,0 +1,226 @@
+---
+// Orquestación GSAP global: kinetic reveal, scroll reveals, flotantes, parallax,
+// raíl horizontal pineado y anillos de estadística. Se limpia en cada navegación
+// de Astro (View Transitions) con gsap.context + revert para evitar memory leaks.
+---
+
+<script>
+  import gsap from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  let ctx: gsap.Context | undefined;
+
+  function cleanup() {
+    ctx?.revert();
+    ctx = undefined;
+    ScrollTrigger.getAll().forEach((t) => t.kill());
+  }
+
+  // Arrastre con mouse/touch para carriles horizontales (.drag-rail).
+  // No depende de GSAP ni de reduced-motion: es interacción, no animación decorativa.
+  function initDragRails() {
+    document.querySelectorAll<HTMLElement>(".drag-rail").forEach((rail) => {
+      let dragging = false;
+      let startX = 0;
+      let startScroll = 0;
+
+      rail.addEventListener("pointerdown", (e) => {
+        dragging = true;
+        rail.setPointerCapture(e.pointerId);
+        startX = e.clientX;
+        startScroll = rail.scrollLeft;
+        // El snap pelea con el arrastre programático; se desactiva mientras dura.
+        rail.style.scrollSnapType = "none";
+      });
+      rail.addEventListener("pointermove", (e) => {
+        if (!dragging) return;
+        rail.scrollLeft = startScroll - (e.clientX - startX);
+      });
+      const stop = () => {
+        dragging = false;
+        rail.style.scrollSnapType = "";
+      };
+      rail.addEventListener("pointerup", stop);
+      rail.addEventListener("pointercancel", stop);
+      rail.addEventListener("pointerleave", stop);
+
+      // Barra de progreso opcional: hermano inmediato [data-rail-progress] con [data-rail-fill].
+      const progress = rail.nextElementSibling;
+      const fill =
+        progress instanceof HTMLElement && progress.hasAttribute("data-rail-progress")
+          ? progress.querySelector<HTMLElement>("[data-rail-fill]")
+          : null;
+      if (fill) {
+        const update = () => {
+          const max = rail.scrollWidth - rail.clientWidth;
+          const p = max > 0 ? rail.scrollLeft / max : 1;
+          fill.style.transform = `scaleX(${Math.max(0.04, Math.min(1, p))})`;
+        };
+        rail.addEventListener("scroll", update, { passive: true });
+        window.addEventListener("resize", update, { passive: true });
+        update();
+      }
+    });
+  }
+
+  function setup() {
+    cleanup();
+    initDragRails();
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return;
+
+    ctx = gsap.context(() => {
+      // --- Reveal cinético del titular hero (líneas enmascaradas) ---
+      const kinetic = gsap.utils.toArray<HTMLElement>(".kinetic-line > span");
+      if (kinetic.length) {
+        gsap.timeline({ delay: 0.15 }).to(kinetic, {
+          y: 0,
+          rotate: 0,
+          duration: 1.1,
+          ease: "power4.out",
+          stagger: 0.09,
+        });
+      }
+
+      // --- Reveal por lotes al entrar en viewport ---
+      ScrollTrigger.batch(".reveal", {
+        start: "top 86%",
+        once: true,
+        onEnter: (batch) =>
+          gsap.to(batch, {
+            opacity: 1,
+            y: 0,
+            duration: 0.95,
+            ease: "power3.out",
+            stagger: 0.1,
+            overwrite: true,
+          }),
+      });
+
+      // --- Elementos flotantes (tarjetas, badges) ---
+      gsap.utils.toArray<HTMLElement>("[data-float]").forEach((el, i) => {
+        gsap.to(el, {
+          y: "-=14",
+          duration: 3 + i * 0.4,
+          ease: "sine.inOut",
+          repeat: -1,
+          yoyo: true,
+        });
+      });
+
+      // --- Parallax sutil en elementos marcados ---
+      gsap.utils.toArray<HTMLElement>("[data-parallax]").forEach((el) => {
+        const speed = Number(el.dataset.parallax) || -8;
+        gsap.to(el, {
+          yPercent: speed,
+          ease: "none",
+          scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: true },
+        });
+      });
+
+      // --- Anillos SVG de estadísticas: se dibujan al entrar en viewport ---
+      gsap.utils.toArray<SVGCircleElement>("[data-ring-fg]").forEach((ring) => {
+        const len = ring.getTotalLength();
+        gsap.set(ring, { strokeDasharray: len, strokeDashoffset: len });
+        ScrollTrigger.create({
+          trigger: ring,
+          start: "top 85%",
+          once: true,
+          onEnter: () =>
+            gsap.to(ring, { strokeDashoffset: 0, duration: 1.6, ease: "power3.out" }),
+        });
+      });
+
+      // --- Raíl horizontal pineado (pilares de marca) ---
+      gsap.utils.toArray<HTMLElement>("[data-pin-rail]").forEach((section) => {
+        const track = section.querySelector<HTMLElement>("[data-pin-track]");
+        if (!track) return;
+        const distance = track.scrollWidth - section.clientWidth;
+        if (distance <= 0) return;
+        gsap.to(track, {
+          x: -distance,
+          ease: "none",
+          scrollTrigger: {
+            trigger: section,
+            start: "top top",
+            end: () => `+=${distance + section.clientHeight}`,
+            scrub: true,
+            pin: true,
+            invalidateOnRefresh: true,
+          },
+        });
+      });
+
+      // --- Timeline de proceso (página de servicio): línea que se dibuja ---
+      gsap.utils.toArray<HTMLElement>("[data-timeline-line]").forEach((line) => {
+        gsap.fromTo(
+          line,
+          { scaleY: 0 },
+          {
+            scaleY: 1,
+            transformOrigin: "top",
+            ease: "none",
+            scrollTrigger: {
+              trigger: line.parentElement,
+              start: "top 70%",
+              end: "bottom 60%",
+              scrub: true,
+            },
+          }
+        );
+      });
+      gsap.utils.toArray<HTMLElement>("[data-timeline-dot]").forEach((dot) => {
+        ScrollTrigger.create({
+          trigger: dot,
+          start: "top 75%",
+          once: true,
+          onEnter: () =>
+            gsap.to(dot, { backgroundColor: "var(--color-gold-400)", scale: 1.15, duration: 0.5, ease: "back.out(3)" }),
+        });
+      });
+
+      // --- Línea horizontal que se dibuja al entrar en viewport (beneficios, cuidados) ---
+      gsap.utils.toArray<HTMLElement>("[data-line-draw]").forEach((line) => {
+        ScrollTrigger.create({
+          trigger: line,
+          start: "top 92%",
+          once: true,
+          onEnter: () =>
+            gsap.to(line, { scaleX: 1, duration: 0.9, ease: "power3.out" }),
+        });
+      });
+
+      // --- Count-up numérico (precios / stats) ---
+      gsap.utils.toArray<HTMLElement>("[data-count-to]").forEach((el) => {
+        const to = Number(el.dataset.countTo) || 0;
+        const prefix = el.dataset.countPrefix ?? "";
+        const obj = { v: 0 };
+        ScrollTrigger.create({
+          trigger: el,
+          start: "top 88%",
+          once: true,
+          onEnter: () =>
+            gsap.to(obj, {
+              v: to,
+              duration: 1.5,
+              ease: "power2.out",
+              onUpdate: () => {
+                el.textContent = prefix + Math.round(obj.v).toLocaleString("es-CO");
+              },
+            }),
+        });
+      });
+    });
+
+    // Recalcula posiciones cuando cargan las fuentes
+    if ((document as any).fonts?.ready) {
+      (document as any).fonts.ready.then(() => ScrollTrigger.refresh());
+    }
+  }
+
+  document.addEventListener("astro:page-load", setup);
+  document.addEventListener("astro:before-swap", cleanup);
+</script>
