@@ -1,0 +1,371 @@
+---
+// Índice editorial de tratamientos que avanza con el scroll: la sección se
+// pinea y cada categoría "vive" un tramo de scroll antes de ceder paso a la
+// siguiente (curtain dorado + giro 3D de las tarjetas), como un scrollytelling
+// editorial en vez de un simple filtro por click.
+// En móvil no se pinea (mala UX con scroll-jacking en pantallas chicas):
+// se muestra un fallback simple en carriles arrastrables, igual que PillarsRail.
+import ServiceCard from "./ServiceCard.astro";
+import { services, categoryMeta, type Categoria } from "../data/services";
+
+const order: Categoria[] = ["facial", "corporal", "salud"];
+const roman = ["I", "II", "III"];
+
+const groups = order.map((key) => ({
+  key,
+  meta: categoryMeta[key],
+  items: services.filter((s) => s.categoria === key),
+}));
+---
+
+<!-- ======================= Versión pineada (desktop) ======================= -->
+<div data-cat-pin class="relative hidden lg:block">
+  <div class="flex h-screen flex-col items-center justify-center py-6">
+    <div class="grid w-full max-w-6xl gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+      <!-- Índice de categorías -->
+      <div>
+        {
+          groups.map((g, i) => (
+            <button
+              type="button"
+              data-cat-btn={g.key}
+              class:list={["cat-index-btn", i === 0 && "is-active"]}
+            >
+              <span class="cat-index-num font-display">{roman[i]}</span>
+              <span class="min-w-0 flex-1">
+                <span class="block font-display text-2xl leading-tight md:text-3xl">{g.meta.label}</span>
+                <span class="mt-1 block text-sm leading-relaxed text-silver-400">{g.meta.blurb}</span>
+                <span class="cat-index-track">
+                  <span data-cat-fill class="cat-index-fill" />
+                </span>
+              </span>
+              <span class="cat-index-count font-display">{String(g.items.length).padStart(2, "0")}</span>
+            </button>
+          ))
+        }
+      </div>
+
+      <!-- Carril de la categoría activa -->
+      <div class="relative">
+        <div data-curtain class="curtain" aria-hidden="true"></div>
+
+        <div class="mb-4 flex items-center justify-between text-[0.68rem] uppercase tracking-[0.3em] text-silver-500">
+          <span>Sigue el scroll para explorar</span>
+          <span class="font-display text-sm tracking-normal text-gold-300">
+            <span data-index-current>01</span> / <span data-index-total>{String(groups[0].items.length).padStart(2, "0")}</span>
+          </span>
+        </div>
+
+        <div data-rail class="drag-rail flex gap-5 overflow-x-auto pb-4">
+          {
+            groups.map((g) =>
+              g.items.map((s) => (
+                <div
+                  data-cat-item
+                  data-category={g.key}
+                  class:list={["w-80 shrink-0", g.key !== groups[0].key && "hidden"]}
+                >
+                  <ServiceCard service={s} />
+                </div>
+              ))
+            )
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Burbuja sutil de scroll -->
+    <div data-scroll-hint class="pointer-events-none absolute inset-x-0 bottom-2 flex justify-center">
+      <span class="scroll-hint-pill">
+        <svg viewBox="0 0 16 24" fill="none" class="h-3.5 w-auto" aria-hidden="true">
+          <rect x="1" y="1" width="14" height="22" rx="7" stroke="currentColor" stroke-width="1.2" />
+          <circle cx="8" cy="7" r="1.6" fill="currentColor" class="scroll-hint-dot" />
+        </svg>
+        Sigue el scroll
+      </span>
+    </div>
+  </div>
+</div>
+
+<!-- ======================= Fallback simple (móvil) ======================= -->
+<div class="space-y-16 lg:hidden">
+  {
+    groups.map((g, i) => (
+      <div>
+        <div class="reveal mb-6 flex items-baseline gap-4">
+          <span class="font-display text-sm text-gold-500/70">{roman[i]}</span>
+          <div>
+            <span class="block font-display text-3xl text-cream">{g.meta.label}</span>
+            <span class="mt-1 block text-sm text-silver-400">{g.meta.blurb}</span>
+          </div>
+        </div>
+        <div class="reveal drag-rail flex gap-5 overflow-x-auto pb-4">
+          {g.items.map((s) => (
+            <div class="w-[78vw] shrink-0">
+              <ServiceCard service={s} />
+            </div>
+          ))}
+        </div>
+      </div>
+    ))
+  }
+</div>
+
+<script>
+  import gsap from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  function initShowcases() {
+    document.querySelectorAll<HTMLElement>("[data-cat-pin]").forEach((pinEl) => {
+      const buttons = Array.from(pinEl.querySelectorAll<HTMLElement>("[data-cat-btn]"));
+      const fills = Array.from(pinEl.querySelectorAll<HTMLElement>("[data-cat-fill]"));
+      const rail = pinEl.querySelector<HTMLElement>("[data-rail]");
+      const curtain = pinEl.querySelector<HTMLElement>("[data-curtain]");
+      const currentEl = pinEl.querySelector<HTMLElement>("[data-index-current]");
+      const totalEl = pinEl.querySelector<HTMLElement>("[data-index-total]");
+      const hint = pinEl.querySelector<HTMLElement>("[data-scroll-hint]");
+      if (!rail || !curtain || !buttons.length) return;
+
+      const allItems = Array.from(rail.querySelectorAll<HTMLElement>("[data-cat-item]"));
+      const total = buttons.length;
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      let current = 0;
+      let animating = false;
+      let pendingIdx: number | null = null;
+
+      const applyIndex = (idx: number, instant = false) => {
+        if (idx === current && !instant) return;
+        const filter = buttons[idx].dataset.catBtn;
+        const items = allItems.filter((el) => el.dataset.category === filter);
+        current = idx;
+
+        buttons.forEach((b, i) => b.classList.toggle("is-active", i === idx));
+        if (currentEl) currentEl.textContent = String(idx + 1).padStart(2, "0");
+        if (totalEl) totalEl.textContent = String(items.length).padStart(2, "0");
+
+        const swap = () => {
+          allItems.forEach((el) => el.classList.toggle("hidden", el.dataset.category !== filter));
+          rail.scrollTo({ left: 0, behavior: "auto" });
+        };
+
+        if (instant || reduce) {
+          swap();
+          return;
+        }
+
+        animating = true;
+        gsap.set(curtain, { transformOrigin: "left center" });
+        gsap
+          .timeline({
+            onComplete: () => {
+              animating = false;
+              if (pendingIdx !== null && pendingIdx !== current) {
+                const next = pendingIdx;
+                pendingIdx = null;
+                applyIndex(next, true);
+              }
+            },
+          })
+          .set(curtain, { scaleX: 0, opacity: 1 })
+          .to(curtain, { scaleX: 1, duration: 0.4, ease: "power3.in" })
+          .call(swap)
+          .set(curtain, { transformOrigin: "right center" })
+          .to(curtain, { scaleX: 0, duration: 0.48, ease: "power3.out" }, "+=0.02")
+          .fromTo(
+            items,
+            { opacity: 0, y: 26, rotateY: -8, transformPerspective: 800 },
+            { opacity: 1, y: 0, rotateY: 0, duration: 0.65, ease: "power3.out", stagger: 0.07 },
+            "-=0.3"
+          );
+      };
+
+      const requestIndex = (idx: number) => {
+        if (animating) {
+          pendingIdx = idx;
+          return;
+        }
+        applyIndex(idx);
+      };
+
+      // Click: salto directo (feedback inmediato) + sincroniza el scroll con su tramo.
+      buttons.forEach((btn, idx) => {
+        btn.addEventListener("click", () => {
+          requestIndex(idx);
+          const st = ScrollTrigger.getById("cat-scrub");
+          if (st) {
+            const target = st.start + (idx / total) * (st.end - st.start) + 4;
+            window.scrollTo({ top: target, behavior: "smooth" });
+          }
+        });
+      });
+
+      if (reduce) return;
+
+      // Animations.astro orquesta un cleanup global de ScrollTrigger en cada
+      // "astro:page-load" (mata todos los triggers para evitar duplicados al
+      // navegar). Su <script> vive después de este en el DOM, así que su
+      // listener corre después del nuestro dentro del mismo evento — si
+      // creáramos el ScrollTrigger de forma síncrona aquí, quedaría destruido
+      // al instante. Se difiere un frame para crearlo ya después de esa limpieza.
+      requestAnimationFrame(() => {
+        ScrollTrigger.matchMedia({
+          "(min-width: 1024px)": () => {
+            const distance = () => window.innerHeight * total * 0.8;
+
+            const trigger = ScrollTrigger.create({
+              id: "cat-scrub",
+              trigger: pinEl,
+              start: "top top",
+              end: () => "+=" + distance(),
+              pin: true,
+              scrub: true,
+              invalidateOnRefresh: true,
+              onUpdate: (self) => {
+                const raw = self.progress * total;
+                const idx = Math.min(total - 1, Math.floor(raw));
+                requestIndex(idx);
+
+                const local = raw - idx;
+                fills.forEach((fill, i) => {
+                  const p = i < idx ? 1 : i === idx ? local : 0;
+                  fill.style.transform = `scaleX(${p})`;
+                });
+              },
+            });
+
+            if (hint) {
+              gsap.to(hint, {
+                opacity: 0,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: pinEl,
+                  start: "top top",
+                  end: () => "+=" + distance() * 0.12,
+                  scrub: true,
+                },
+              });
+            }
+
+            return () => trigger.kill();
+          },
+        });
+      });
+    });
+  }
+
+  document.addEventListener("astro:page-load", initShowcases);
+</script>
+
+<style>
+  .cat-index-btn {
+    display: flex;
+    width: 100%;
+    align-items: baseline;
+    gap: 1.25rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-silver-100) 10%, transparent);
+    padding: 1.15rem 0.25rem;
+    text-align: left;
+    color: var(--color-silver-400);
+    transition: color 0.4s ease, padding-left 0.4s ease;
+  }
+  .cat-index-btn:first-child {
+    border-top: 1px solid color-mix(in srgb, var(--color-silver-100) 10%, transparent);
+  }
+  .cat-index-btn:hover {
+    padding-left: 0.75rem;
+  }
+  .cat-index-num {
+    font-size: 0.95rem;
+    color: color-mix(in srgb, var(--color-gold-400) 55%, transparent);
+    transition: color 0.4s ease;
+  }
+  .cat-index-count {
+    font-size: 1.1rem;
+    color: var(--color-silver-600);
+    transition: color 0.4s ease;
+  }
+  .cat-index-btn span:nth-child(2) > span:first-child {
+    color: var(--color-silver-300);
+    transition: color 0.4s ease;
+  }
+  .cat-index-btn.is-active {
+    color: var(--color-silver-200);
+    padding-left: 0.75rem;
+  }
+  .cat-index-btn.is-active .cat-index-num,
+  .cat-index-btn.is-active .cat-index-count {
+    color: var(--color-gold-300);
+  }
+  .cat-index-btn.is-active span:nth-child(2) > span:first-child {
+    color: var(--color-gold-200);
+  }
+
+  /* Barra de progreso por categoría (estilo "stories") */
+  .cat-index-track {
+    margin-top: 0.6rem;
+    display: block;
+    height: 2px;
+    width: 100%;
+    max-width: 12rem;
+    overflow: hidden;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--color-silver-100) 12%, transparent);
+  }
+  .cat-index-fill {
+    display: block;
+    height: 100%;
+    width: 100%;
+    transform: scaleX(0);
+    transform-origin: left center;
+    background: linear-gradient(90deg, var(--color-gold-400), var(--color-gold-200));
+    will-change: transform;
+  }
+
+  .curtain {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    transform: scaleX(0);
+    background: linear-gradient(100deg, var(--color-gold-600), var(--color-gold-300) 45%, var(--color-gold-500));
+    pointer-events: none;
+    border-radius: 1.5rem;
+  }
+
+  /* Burbuja sutil de scroll */
+  .scroll-hint-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    border-radius: 9999px;
+    border: 1px solid color-mix(in srgb, var(--color-gold-400) 25%, transparent);
+    background: color-mix(in srgb, var(--color-plum-950) 55%, transparent);
+    backdrop-filter: blur(8px);
+    padding: 0.5rem 1.1rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-silver-400);
+  }
+  .scroll-hint-dot {
+    animation: scroll-hint-dot 1.8s ease-in-out infinite;
+  }
+  @keyframes scroll-hint-dot {
+    0%,
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    50% {
+      transform: translateY(5px);
+      opacity: 0.3;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-hint-dot {
+      animation: none;
+    }
+  }
+</style>
