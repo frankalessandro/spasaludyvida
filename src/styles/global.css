@@ -309,6 +309,11 @@
   .drag-rail:active {
     cursor: grabbing;
   }
+  /* Sin drag nativo de enlaces/imágenes: cancela el arrastre del carril (Safari) */
+  .drag-rail a,
+  .drag-rail img {
+    -webkit-user-drag: none;
+  }
 
   /* Progreso de un carril arrastrable (se actualiza por JS en Animations.astro) */
   .rail-track {
