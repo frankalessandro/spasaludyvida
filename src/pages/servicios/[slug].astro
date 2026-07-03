@@ -86,6 +86,10 @@ const relatedSorted = [
 ].slice(0, 6);
 
 const galeriaCaptions = ["Equipo especializado", "Cabina de tratamiento", "Aplicación", "Resultado"];
+
+// El contador del precio baja desde un valor mayor hasta el precio real
+// (sensación de precio más asequible de lo esperado)
+const precioCountFrom = Math.ceil((service.precio_por_sesion * 1.35) / 1000) * 1000;
 ---
 
 <Layout title={`${service.nombre} — Spa Salud y Vida`} description={service.descripcion_short}>
@@ -117,7 +121,10 @@ const galeriaCaptions = ["Equipo especializado", "Cabina de tratamiento", "Aplic
         <div class="reveal mt-9">
           <span class="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-silver-400">Desde</span>
           <p class="font-display text-4xl text-gold sm:text-5xl">
-            <span data-count-to={service.precio_por_sesion} data-count-prefix="$">$0</span>
+            <span
+              data-count-to={service.precio_por_sesion}
+              data-count-from={precioCountFrom}
+              data-count-prefix="$">${precioCountFrom.toLocaleString("es-CO")}</span>
           </p>
           <span class="text-xs text-silver-500">por sesión — planes completos más abajo</span>
         </div>

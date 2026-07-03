@@ -193,11 +193,14 @@
         });
       });
 
-      // --- Count-up numérico (precios / stats) ---
+      // --- Count numérico (precios / stats) ---
+      // Sube desde 0 por defecto; con data-count-from baja desde un valor
+      // mayor hacia el precio final (sensación de precio más asequible).
       gsap.utils.toArray<HTMLElement>("[data-count-to]").forEach((el) => {
         const to = Number(el.dataset.countTo) || 0;
+        const from = el.dataset.countFrom != null ? Number(el.dataset.countFrom) : 0;
+        const obj = { v: from };
         const prefix = el.dataset.countPrefix ?? "";
-        const obj = { v: 0 };
         ScrollTrigger.create({
           trigger: el,
           start: "top 88%",
