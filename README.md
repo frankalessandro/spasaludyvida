@@ -1,47 +1,60 @@
-# Astro Starter Kit: Basics
+# Salud & Vida — Spa · Estética
 
-```sh
-pnpm create astro@latest -- --template basics
-```
+Sitio web estático para un spa de estética (tratamientos faciales, corporales y de salud). Landing con storytelling animado por scroll: hero, pilares de marca, showcase de tratamientos por categoría (con vista pineada en desktop y carriles deslizables en móvil), sección de experiencia y ficha de detalle por servicio.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Stack
 
-## 🚀 Project Structure
+- **[Astro](https://astro.build)** — sitio estático, sin SSR
+- **Tailwind CSS** — estilos utility-first
+- **GSAP** (+ ScrollTrigger) — animaciones y scrollytelling
+- **pnpm** — gestor de paquetes
 
-Inside of your Astro project, you'll see the following folders and files:
+## Estructura del proyecto
 
 ```text
 /
 ├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
+├── src/
+│   ├── assets/            # imágenes y recursos
+│   ├── components/
+│   │   ├── Navbar.astro
+│   │   ├── Footer.astro
+│   │   ├── Logo.astro
+│   │   ├── Cursor.astro
+│   │   ├── RotatingSeal.astro
+│   │   ├── PillarsRail.astro          # carril pineado de pilares de marca
+│   │   ├── CategoryShowcase.astro     # showcase de tratamientos por categoría
+│   │   ├── ServiceCard.astro
+│   │   ├── ServiceArt.astro
+│   │   ├── StatRing.astro
+│   │   ├── OrganicClips.astro         # clip-paths orgánicos reutilizables
+│   │   └── Animations.astro           # orquestación global de GSAP/ScrollTrigger
+│   ├── data/
+│   │   └── services.ts                # catálogo de tratamientos y metadata
+│   ├── layouts/
+│   │   └── Layout.astro
+│   ├── pages/
+│   │   ├── index.astro
+│   │   └── servicios/[slug].astro     # ficha de detalle por tratamiento
+│   └── styles/
+│       └── global.css
 └── package.json
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+## Comandos
 
-## 🧞 Commands
+Todos los comandos se ejecutan desde la raíz del proyecto:
 
-All commands are run from the root of the project, from a terminal:
+| Comando          | Acción                                              |
+| :--------------- | :--------------------------------------------------- |
+| `pnpm install`    | Instala las dependencias                             |
+| `pnpm dev`        | Levanta el servidor local en `localhost:4321`        |
+| `pnpm build`      | Genera el sitio estático en `./dist/`                |
+| `pnpm preview`    | Sirve el build de producción localmente              |
+| `pnpm astro ...`  | Ejecuta comandos de la CLI de Astro (`astro check`, etc.) |
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `pnpm install`             | Installs dependencies                            |
-| `pnpm dev`             | Starts local dev server at `localhost:4321`      |
-| `pnpm build`           | Build your production site to `./dist/`          |
-| `pnpm preview`         | Preview your build locally, before deploying     |
-| `pnpm astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `pnpm astro -- --help` | Get help using the Astro CLI                     |
+## Notas de desarrollo
 
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
-# spasaludyvida
+- Los tratamientos se definen en [`src/data/services.ts`](src/data/services.ts); agregar uno ahí genera automáticamente su card y su página de detalle.
+- Las animaciones GSAP usan `gsap.context()` para scope y limpieza entre navegaciones (View Transitions de Astro); ver [`Animations.astro`](src/components/Animations.astro).
+- En móvil, los carriles con scroll-jacking (pin + scrub) se reemplazan por un fallback simple de carriles arrastrables.
