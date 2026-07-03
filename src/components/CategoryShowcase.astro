@@ -1,8 +1,9 @@
 ---
 // Índice editorial de tratamientos que avanza con el scroll: la sección se
-// pinea y cada categoría "vive" un tramo de scroll antes de ceder paso a la
-// siguiente (curtain dorado + giro 3D de las tarjetas), como un scrollytelling
-// editorial en vez de un simple filtro por click.
+// pinea y cada categoría "vive" un tramo de scroll idéntico; entre categorías
+// hay una transición más corta (curtain dorado + giro 3D de las tarjetas)
+// ligada al scroll (scrub reversible), como un scrollytelling editorial en
+// vez de un simple filtro por click.
 // En móvil no se pinea (mala UX con scroll-jacking en pantallas chicas):
 // se muestra un fallback simple en carriles arrastrables, igual que PillarsRail.
 import ServiceCard from "./ServiceCard.astro";
@@ -21,7 +22,7 @@ const groups = order.map((key) => ({
 <!-- ======================= Versión pineada (desktop) ======================= -->
 <div data-cat-pin class="relative hidden lg:block">
   <div class="flex h-screen flex-col items-center justify-center py-6">
-    <div class="grid w-full max-w-6xl gap-10 lg:grid-cols-[0.8fr_1.2fr] lg:items-center">
+    <div class="grid w-full max-w-6xl gap-8 lg:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)] lg:items-center xl:gap-10 xl:grid-cols-[0.8fr_1.2fr]">
       <!-- Índice de categorías -->
       <div>
         {
@@ -51,25 +52,50 @@ const groups = order.map((key) => ({
 
         <div class="mb-4 flex items-center justify-between text-[0.68rem] uppercase tracking-[0.3em] text-silver-500">
           <span>Sigue el scroll para explorar</span>
-          <span class="font-display text-sm tracking-normal text-gold-300">
-            <span data-index-current>01</span> / <span data-index-total>{String(groups[0].items.length).padStart(2, "0")}</span>
-          </span>
+          <div class="flex items-center gap-5">
+            <span class="font-display text-sm tracking-normal text-gold-300">
+              <span data-index-current>01</span> / <span data-index-total>{String(groups.length).padStart(2, "0")}</span>
+            </span>
+            <div class="flex items-center gap-2">
+              <button type="button" data-rail-prev class="rail-arrow" aria-label="Tratamientos anteriores">
+                <svg viewBox="0 0 16 16" fill="none" class="h-3.5 w-3.5" aria-hidden="true">
+                  <path d="M10.5 3 5.5 8l5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+              <button type="button" data-rail-next class="rail-arrow" aria-label="Siguientes tratamientos">
+                <svg viewBox="0 0 16 16" fill="none" class="h-3.5 w-3.5" aria-hidden="true">
+                  <path d="m5.5 3 5 5-5 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div data-rail class="drag-rail flex gap-5 overflow-x-auto pb-4">
+        <!-- Misma distribución para todas las categorías: el ancho de card es
+             fluido (1/1.6 del carril, tope 25rem) para que en cualquier ancho
+             de desktop se vea 1 card completa + un peek claro de la siguiente,
+             y siempre haya scroll lateral. -->
+        <div data-rail class="drag-rail flex snap-x gap-5 overflow-x-auto pb-4">
           {
             groups.map((g) =>
               g.items.map((s) => (
                 <div
                   data-cat-item
                   data-category={g.key}
-                  class:list={["w-80 shrink-0", g.key !== groups[0].key && "hidden"]}
+                  class:list={[
+                    "w-[min(25rem,calc((100%-1.25rem)/1.6))] shrink-0 snap-start",
+                    g.key !== groups[0].key && "hidden",
+                  ]}
                 >
                   <ServiceCard service={s} />
                 </div>
               ))
             )
           }
+        </div>
+        <!-- Indicador del scroll lateral (lo conecta Animations.astro) -->
+        <div data-rail-progress class="rail-track mt-1">
+          <span data-rail-fill class="rail-fill"></span>
         </div>
       </div>
     </div>
@@ -138,73 +164,61 @@ const groups = order.map((key) => ({
       const total = buttons.length;
       const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+      const itemsFor = (idx: number) =>
+        allItems.filter((el) => el.dataset.category === buttons[idx].dataset.catBtn);
+
+      if (totalEl) totalEl.textContent = String(total).padStart(2, "0");
+
       let current = 0;
-      let animating = false;
-      let pendingIdx: number | null = null;
-
-      const applyIndex = (idx: number, instant = false) => {
-        if (idx === current && !instant) return;
-        const filter = buttons[idx].dataset.catBtn;
-        const items = allItems.filter((el) => el.dataset.category === filter);
+      const setActive = (idx: number) => {
+        if (idx === current) return;
         current = idx;
-
+        const filter = buttons[idx].dataset.catBtn;
+        allItems.forEach((el) => el.classList.toggle("hidden", el.dataset.category !== filter));
         buttons.forEach((b, i) => b.classList.toggle("is-active", i === idx));
         if (currentEl) currentEl.textContent = String(idx + 1).padStart(2, "0");
-        if (totalEl) totalEl.textContent = String(items.length).padStart(2, "0");
+        rail.scrollTo({ left: 0, behavior: "auto" });
+        // Refresca la barra de progreso lateral (el ancho scrolleable cambió)
+        rail.dispatchEvent(new Event("scroll"));
+      };
 
-        const swap = () => {
-          allItems.forEach((el) => el.classList.toggle("hidden", el.dataset.category !== filter));
-          rail.scrollTo({ left: 0, behavior: "auto" });
+      // Flechas de carousel: avanzan/retroceden una card y se deshabilitan en
+      // los extremos. setActive dispara "scroll" al resetear, así se refrescan.
+      const prev = pinEl.querySelector<HTMLButtonElement>("[data-rail-prev]");
+      const next = pinEl.querySelector<HTMLButtonElement>("[data-rail-next]");
+      if (prev && next) {
+        const step = () => {
+          const card = rail.querySelector<HTMLElement>("[data-cat-item]:not(.hidden)");
+          return (card ? card.getBoundingClientRect().width : rail.clientWidth * 0.6) + 20;
         };
+        const updateArrows = () => {
+          const max = rail.scrollWidth - rail.clientWidth;
+          prev.disabled = rail.scrollLeft <= 2;
+          next.disabled = rail.scrollLeft >= max - 2;
+        };
+        prev.addEventListener("click", () => rail.scrollBy({ left: -step(), behavior: "smooth" }));
+        next.addEventListener("click", () => rail.scrollBy({ left: step(), behavior: "smooth" }));
+        rail.addEventListener("scroll", updateArrows, { passive: true });
+        window.addEventListener("resize", updateArrows, { passive: true });
+        updateArrows();
+      }
 
-        if (instant || reduce) {
-          swap();
-          return;
-        }
+      // Reparto del scroll: cada categoría vive un tramo idéntico (1 unidad) y
+      // entre categorías hay una transición más corta (T unidades) que avanza
+      // y retrocede *con* el scroll (scrub), no como animación disparada.
+      const T = 0.35;
+      const unit = 1 + T;
+      const units = total * unit - T;
 
-        animating = true;
-        gsap.set(curtain, { transformOrigin: "left center" });
-        gsap
-          .timeline({
-            onComplete: () => {
-              animating = false;
-              if (pendingIdx !== null && pendingIdx !== current) {
-                const next = pendingIdx;
-                pendingIdx = null;
-                applyIndex(next, true);
-              }
-            },
-          })
-          .set(curtain, { scaleX: 0, opacity: 1 })
-          .to(curtain, { scaleX: 1, duration: 0.4, ease: "power3.in" })
-          .call(swap)
-          .set(curtain, { transformOrigin: "right center" })
-          .to(curtain, { scaleX: 0, duration: 0.48, ease: "power3.out" }, "+=0.02")
-          .fromTo(
-            items,
-            { opacity: 0, y: 26, rotateY: -8, transformPerspective: 800 },
-            { opacity: 1, y: 0, rotateY: 0, duration: 0.65, ease: "power3.out", stagger: 0.07 },
-            "-=0.3"
-          );
-      };
-
-      const requestIndex = (idx: number) => {
-        if (animating) {
-          pendingIdx = idx;
-          return;
-        }
-        applyIndex(idx);
-      };
-
-      // Click: salto directo (feedback inmediato) + sincroniza el scroll con su tramo.
       buttons.forEach((btn, idx) => {
         btn.addEventListener("click", () => {
-          requestIndex(idx);
           const st = ScrollTrigger.getById("cat-scrub");
-          if (st) {
-            const target = st.start + (idx / total) * (st.end - st.start) + 4;
-            window.scrollTo({ top: target, behavior: "smooth" });
+          if (!st) {
+            setActive(idx);
+            return;
           }
+          const target = st.start + ((idx * unit + 0.02) / units) * (st.end - st.start);
+          window.scrollTo({ top: target, behavior: "smooth" });
         });
       });
 
@@ -219,7 +233,20 @@ const groups = order.map((key) => ({
       requestAnimationFrame(() => {
         ScrollTrigger.matchMedia({
           "(min-width: 1024px)": () => {
-            const distance = () => window.innerHeight * total * 0.8;
+            // Entrada de cards por categoría: timeline pausado cuyo progreso se
+            // controla desde el scroll (reversible, sin "disparos").
+            const tlIn = buttons.map((_, i) =>
+              gsap
+                .timeline({ paused: true })
+                .fromTo(
+                  itemsFor(i),
+                  { opacity: 0, y: 26, rotateY: -8, transformPerspective: 800 },
+                  { opacity: 1, y: 0, rotateY: 0, duration: 1, ease: "power2.out", stagger: 0.12 }
+                )
+            );
+            tlIn[0].progress(1);
+
+            const distance = () => window.innerHeight * 0.7 * units;
 
             const trigger = ScrollTrigger.create({
               id: "cat-scrub",
@@ -230,13 +257,34 @@ const groups = order.map((key) => ({
               scrub: true,
               invalidateOnRefresh: true,
               onUpdate: (self) => {
-                const raw = self.progress * total;
-                const idx = Math.min(total - 1, Math.floor(raw));
-                requestIndex(idx);
+                const u = self.progress * units;
+                const i = Math.min(total - 1, Math.floor(u / unit));
+                const local = u - i * unit;
 
-                const local = raw - idx;
-                fills.forEach((fill, i) => {
-                  const p = i < idx ? 1 : i === idx ? local : 0;
+                if (local <= 1 || i === total - 1) {
+                  // Tramo estable: la categoría i quieta, sin curtain
+                  setActive(i);
+                  gsap.set(curtain, { scaleX: 0 });
+                  tlIn[i].progress(1);
+                } else {
+                  // Transición i → i+1, scrubbed: primera mitad repliega las
+                  // cards actuales mientras el curtain cubre; segunda mitad lo
+                  // descubre y despliega las siguientes.
+                  const p = (local - 1) / T;
+                  if (p < 0.5) {
+                    setActive(i);
+                    gsap.set(curtain, { transformOrigin: "left center", scaleX: p * 2 });
+                    tlIn[i].progress(1 - p * 2);
+                  } else {
+                    setActive(i + 1);
+                    gsap.set(curtain, { transformOrigin: "right center", scaleX: (1 - p) * 2 });
+                    tlIn[i + 1].progress((p - 0.5) * 2);
+                  }
+                }
+
+                // Barras "stories": cada una se llena durante el tramo de su categoría
+                fills.forEach((fill, k) => {
+                  const p = Math.max(0, Math.min(1, u - k * unit));
                   fill.style.transform = `scaleX(${p})`;
                 });
               },
@@ -328,6 +376,27 @@ const groups = order.map((key) => ({
     transform-origin: left center;
     background: linear-gradient(90deg, var(--color-gold-400), var(--color-gold-200));
     will-change: transform;
+  }
+
+  /* Flechas de carousel del carril */
+  .rail-arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 9999px;
+    border: 1px solid color-mix(in srgb, var(--color-gold-400) 30%, transparent);
+    color: var(--color-gold-200);
+    transition: background-color 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+  }
+  .rail-arrow:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--color-gold-400) 14%, transparent);
+    border-color: color-mix(in srgb, var(--color-gold-400) 55%, transparent);
+  }
+  .rail-arrow:disabled {
+    opacity: 0.3;
+    cursor: default;
   }
 
   .curtain {

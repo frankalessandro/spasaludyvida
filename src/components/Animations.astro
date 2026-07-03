@@ -22,29 +22,58 @@
   // No depende de GSAP ni de reduced-motion: es interacción, no animación decorativa.
   function initDragRails() {
     document.querySelectorAll<HTMLElement>(".drag-rail").forEach((rail) => {
+      let pressed = false;
       let dragging = false;
       let startX = 0;
       let startScroll = 0;
+      let moved = 0;
+
+      // Los carriles contienen <a>/<img>: el drag nativo de enlaces del
+      // navegador cancela los eventos pointer y "bloquea" el arrastre lateral.
+      rail.addEventListener("dragstart", (e) => e.preventDefault());
 
       rail.addEventListener("pointerdown", (e) => {
-        dragging = true;
-        rail.setPointerCapture(e.pointerId);
+        if (e.pointerType === "mouse" && e.button !== 0) return;
+        pressed = true;
+        moved = 0;
         startX = e.clientX;
         startScroll = rail.scrollLeft;
-        // El snap pelea con el arrastre programático; se desactiva mientras dura.
-        rail.style.scrollSnapType = "none";
       });
       rail.addEventListener("pointermove", (e) => {
-        if (!dragging) return;
-        rail.scrollLeft = startScroll - (e.clientX - startX);
+        if (!pressed) return;
+        const delta = e.clientX - startX;
+        moved = Math.max(moved, Math.abs(delta));
+        // Capturar el puntero recién al arrastrar de verdad: si se captura en
+        // pointerdown, el click resultante se retargetea al carril y los <a>
+        // de las cards nunca reciben el click (rompe la navegación).
+        if (!dragging && moved > 6) {
+          dragging = true;
+          rail.setPointerCapture(e.pointerId);
+          // El snap pelea con el arrastre programático; se desactiva mientras dura.
+          rail.style.scrollSnapType = "none";
+        }
+        if (dragging) rail.scrollLeft = startScroll - delta;
       });
       const stop = () => {
+        pressed = false;
         dragging = false;
         rail.style.scrollSnapType = "";
       };
       rail.addEventListener("pointerup", stop);
       rail.addEventListener("pointercancel", stop);
       rail.addEventListener("pointerleave", stop);
+
+      // Si hubo arrastre real, el click al soltar no debe navegar al link.
+      rail.addEventListener(
+        "click",
+        (e) => {
+          if (moved > 6) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        },
+        true
+      );
 
       // Barra de progreso opcional: hermano inmediato [data-rail-progress] con [data-rail-fill].
       const progress = rail.nextElementSibling;
